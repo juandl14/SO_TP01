@@ -14,23 +14,20 @@ int main(int argc, char const *argv[]) {
     ** tantos hijos como argumentos, ya que no quiero tener mas hijos que argumentos
     */
     // int slaveAmount = (SLAVE_AMOUNT > argc - 1)? argc - 1 : SLAVE_AMOUNT;
-    if (createChildren() != 1) {
-        fprintf(stderr, "%s\n", "Error creating children");
-        exit(EXIT_FAILURE);
-    }
+    createChildren();
 }
 
-int createChildren(/*int childrenAmount*/) {
+void createChildren(/*int childrenAmount*/) {
     pid_t pid;
     /* Creo los pipes: fdPath va del master al slave y fdData va del slave al master
     */
     int fdPath[2], fdData[2];
 
-    if (pipe(fdPath) == -1 || pipe(fdData) == -1) {
-        errorHandler("pipe");
+    if (pipe(fdPath) == ERROR_CODE || pipe(fdData) == ERROR_CODE) {
+        errorHandler("Error creating pipe in function createChildren");
     }
 
-    if ((pid = fork()) != -1) {
+    if ((pid = fork()) != ERROR_CODE) {
         if (pid == 0) {
             printf("Soy el hijo. Mi PID es %d y el de mi padre, %d\n", getpid(), getppid());
             sleep(2);
@@ -42,7 +39,7 @@ int createChildren(/*int childrenAmount*/) {
             printf("Proceso padre terminado.\n");
         }
     } else {
-        errorHandler("fork");
+        errorHandler("Error forking in function createChildren");
     }
     return 1;
 }
