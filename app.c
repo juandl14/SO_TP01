@@ -1,5 +1,5 @@
 #include "app.h"
-#include "errors"
+#include "errors.h"
 
 int createChildren(/*int childrenAmount*/);
 
@@ -27,7 +27,7 @@ int createChildren(/*int childrenAmount*/) {
     int fdPath[2], fdData[2];
 
     if (pipe(fdPath) == -1 || pipe(fdData) == -1) {
-        
+        errorHandler("pipe");
     }
 
     if ((pid = fork()) != -1) {
@@ -42,7 +42,7 @@ int createChildren(/*int childrenAmount*/) {
             printf("Proceso padre terminado.\n");
         }
     } else {
-        return -1;
+        errorHandler("fork");
     }
     return 1;
 }
