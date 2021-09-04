@@ -12,12 +12,13 @@
 #define SLAVE_AMOUNT 8
 #define READ_FD 0
 #define WRITE_FD 1
+#define TASK_MAX_CAP 3
 
 typedef struct slave {
     pid_t pid;
     int in;
     int out;
     int working;
-} slave;
+} Tslave;
 
 #endif

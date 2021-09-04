@@ -1,4 +1,4 @@
-#include "errors.h"
+#include <errors.h>
 
 void errorHandler(const char *errorMsg) {
     perror(errorMsg);
