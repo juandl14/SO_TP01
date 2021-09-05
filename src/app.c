@@ -1,7 +1,6 @@
 #include <app.h>
-#include <errors.h>
 
-void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *const tasks[]);
+void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
 
 int main(int argc, char const *argv[]) {
 
@@ -18,13 +17,13 @@ int main(int argc, char const *argv[]) {
 
     Tslave slavesArray[slaveAmount];
 
-    createChildren(slavesArray, taskCount, slaveAmount, argv + 1);
+    createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ "./slave", NULL);
 }
 
-void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *const tasks[]) {
+void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {
     pid_t pid;
 
-    // for (int i = 0; i < slaveAmount; i++) {
+    for (int i = 0; i < slaveAmount; i++) {
         /* Creo los pipes: fdPath va del master al slave y fdData va del slave al master
         */
         int fdPath[2], fdData[2];
@@ -47,6 +46,10 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
                 close(fdPath[READ_FD]);
                 close(fdData[WRITE_FD]);
 
+                // execv(path, argv);
+
+                // errorHandler("Error performing execv in function createChildren");
+
                 // -------------PRUEBA---------------------
                 // printf("Soy el hijo. Mi PID es %d y el de mi padre, %d\n", getpid(), getppid());
                 // sleep(2);
@@ -55,7 +58,10 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
                 close(fdPath[READ_FD]);
                 close(fdData[WRITE_FD]);
 
-                // Falta armar la matriz que se llena aca
+                slavesArray[i].pid = pid;
+                slavesArray[i].in = fdData[READ_FD];
+                slavesArray[i].out = fdPath[WRITE_FD];
+                slavesArray[i].working = 0;
 
                 // -------------PRUEBA---------------------
                 // printf("Soy el padre. Mi PID es %d y el de mi hijo, %d\n", getpid(), pid);
@@ -66,5 +72,5 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
         } else {
             errorHandler("Error forking in function createChildren");
         }
-    // }
+    }
 }

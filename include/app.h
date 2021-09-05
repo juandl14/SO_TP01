@@ -8,11 +8,12 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <errors.h>
 
 #define SLAVE_AMOUNT 8
 #define READ_FD 0
 #define WRITE_FD 1
-#define TASK_MAX_CAP 3
+#define TASK_MAX_CAP 2
 
 typedef struct slave {
     pid_t pid;
