@@ -1,9 +1,10 @@
-#include <slave.h>
+#include "slave.h"
+#include "errors.h"
 
 int main(int argc, char const *argv[]) {
 
     if(setvbuf(stdout, NULL, _IONBF, 0) != 0) {
-        errorHandler("Error performing setvbuf in function main");
+        errorHandler("Error performing setvbuf in main (slave)");
     }
 
     char *fileName = NULL;
@@ -17,4 +18,14 @@ int main(int argc, char const *argv[]) {
 
 void solver(char const *fileName) {
     char command[BUFFER] = {0};
+    sptrintf(command,"minisat %s | /bin/grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",fileName);
+
+    FILE * pipeName = popen(command, "r");
+    if(pipeName == NULL) {
+        errorHandler("Error performing popen solver (slave)");
+    }
+
+
+
+    pclose(pipeName);
 }

@@ -1,4 +1,4 @@
-#include <app.h>
+#include "app.h"
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
 
