@@ -9,8 +9,8 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    /* Si tengo menos argumentos que SLAVE_AMOUNT, creo
-    ** tantos hijos como argumentos, ya que no quiero tener mas hijos que argumentos
+    /* If I have less arguments than SLAVE_AMOUNT, I create
+    ** as many children as arguments, since I do not want more children than arguments
     */
     int taskCount = argc - 1;
     int slaveAmount = (SLAVE_AMOUNT > taskCount)? taskCount : SLAVE_AMOUNT;
@@ -24,7 +24,9 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
     pid_t pid;
 
     for (int i = 0; i < slaveAmount; i++) {
-        /* Creo los pipes: fdPath va del master al slave y fdData va del slave al master
+        /* Creating the pipes : 
+        ** fdPath goes from the master to the slave and
+        ** fdData goes from the slave to the master
         */
         int fdPath[2], fdData[2];
 
@@ -50,7 +52,7 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
 
                 // errorHandler("Error performing execv in function createChildren");
 
-                // -------------PRUEBA---------------------
+                // -------------TEST---------------------
                 // printf("Soy el hijo. Mi PID es %d y el de mi padre, %d\n", getpid(), getppid());
                 // sleep(2);
                 // printf("Proceso hijo terminado.\n");
@@ -63,7 +65,7 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
                 slavesArray[i].out = fdPath[WRITE_FD];
                 slavesArray[i].working = 0;
 
-                // -------------PRUEBA---------------------
+                // -------------TEST---------------------
                 // printf("Soy el padre. Mi PID es %d y el de mi hijo, %d\n", getpid(), pid);
                 // sleep(3);
                 // waitpid(pid, NULL, 0);
