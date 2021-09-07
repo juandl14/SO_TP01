@@ -16,16 +16,23 @@ int main(int argc, char const *argv[]) {
     }
 }
 
-void solver(char const *fileName) {
+void solver(const char *fileName) {
     char command[BUFFER] = {0};
-    sptrintf(command,"minisat %s | /bin/grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",fileName);
+    sprintf(command,"minisat %s | /bin/grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",fileName);
 
-    FILE * pipeName = popen(command, "r");
-    if(pipeName == NULL) {
+    FILE * fd = popen(command, "r");
+    if(fd == NULL) {
         errorHandler("Error performing popen solver (slave)");
     }
 
+    char input[BUFFER/2]={0};
+    fread(input,sizeof(char),BUFFER,fd);
 
+    char output[BUFFER];
+    sprintf(output,"PID: %d\nFile: %s\n%s\n",getpid(),fileName,input);
+    write(WRITE_FD,output,strlen(output)+1);
 
-    pclose(pipeName);
+    if(pclose(fd)==-1) {
+        errorHandler("Error performing pclose solver (slave)");
+    }
 }

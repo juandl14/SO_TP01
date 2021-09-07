@@ -42,15 +42,15 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
                 // close(WRITE_FD);
 
                 if (dup2(fdPath[READ_FD], 0) == ERROR_CODE || dup2(fdData[WRITE_FD], 1) == ERROR_CODE) {
-                    errorHandler("Error performing dup2 in function createChildren");
+                    errorHandler("Error performing dup2 in function createChildren (app)");
                 }
 
                 close(fdPath[READ_FD]);
                 close(fdData[WRITE_FD]);
 
-                // execv(path, argv);
-
-                // errorHandler("Error performing execv in function createChildren");
+                if (execv(path, argv) == ERROR_CODE) {
+                    errorHandler("Error performing execv in function createChildren");
+                }
 
                 // -------------TEST---------------------
                 // printf("Soy el hijo. Mi PID es %d y el de mi padre, %d\n", getpid(), getppid());
@@ -72,7 +72,7 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
                 // printf("Proceso padre terminado.\n");
             }
         } else {
-            errorHandler("Error forking in function createChildren");
+            errorHandler("Error forking in function createChildren (app)");
         }
     }
 }
