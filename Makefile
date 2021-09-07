@@ -7,7 +7,7 @@ all: App Slave # View
 App: src/app.c src/errors.c include/app.h include/errors.h
 	$(GCC) $(GCC_FLAGS) -I./include src/app.c src/errors.c -o App $(O_FLAGS)
 
-Slave:
+Slave: src/slave.c src/errors.c include/slave.h include/errors.h
 	$(GCC) $(GCC_FLAGS) -I./include src/slave.c src/errors.c -o Slave $(O_FLAGS)
 clean:
 	rm -rf App
