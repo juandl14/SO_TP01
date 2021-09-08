@@ -11,6 +11,7 @@
 #include <errors.h>
 
 #define SLAVE_AMOUNT 8
+#define SLAVE_PATH "./Slave"
 #define READ_FD 0
 #define WRITE_FD 1
 #define TASK_MAX_CAP 2

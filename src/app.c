@@ -17,7 +17,7 @@ int main(int argc, char const *argv[]) {
 
     Tslave slavesArray[slaveAmount];
 
-    createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ "./Slave", NULL);
+    createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 }
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {
@@ -37,15 +37,16 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
         if ((pid = fork()) != ERROR_CODE) {
 
             if (pid == 0) {
+                
                 close(fdPath[WRITE_FD]);
                 close(fdData[READ_FD]);
                 // close(READ_FD);
                 // close(WRITE_FD);
-
+                printf("%d %d\n",fdPath[READ_FD],fdData[WRITE_FD]);
                 if (dup2(fdPath[READ_FD], 0) == ERROR_CODE || dup2(fdData[WRITE_FD], 1) == ERROR_CODE) {
                     errorHandler("Error performing dup2 in function createChildren (app)");
                 }
-                printf("HOLA\n");
+                printf("Termine dup\n");
                 close(fdPath[READ_FD]);
                 close(fdData[WRITE_FD]);
                 
