@@ -9,6 +9,7 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <errors.h>
+#include <string.h>
 
 #define SLAVE_AMOUNT 8
 #define SLAVE_PATH "./Slave"

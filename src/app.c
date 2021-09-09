@@ -2,7 +2,7 @@
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
 
     if (argc < 2) {
         fprintf(stderr, "%s\n", "Incorrect amount of arguments");
@@ -15,16 +15,27 @@ int main(int argc, char const *argv[]) {
     int taskCount = argc - 1;
     int slaveAmount = (SLAVE_AMOUNT > taskCount)? taskCount : SLAVE_AMOUNT;
 
+    FILE *resultFile;
+
     Tslave slavesArray[slaveAmount];
 
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
+
+    // Send first files to the slaves
+    int taskIndex = 0;
+
+    for(int slaveIndex = 0; slaveIndex < slaveAmount; i++) {
+
+        sendFiles(slavesArray[slaveIndex], argv[], &taskIndex);
+
+    }
 }
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {
     pid_t pid;
 
     for (int i = 0; i < slaveAmount; i++) {
-        /* Creating the pipes : 
+        /* Creating the pipes :
         ** fdPath goes from the master to the slave and
         ** fdData goes from the slave to the master
         */
@@ -37,7 +48,7 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
         if ((pid = fork()) != ERROR_CODE) {
 
             if (pid == 0) {
-                
+
                 close(fdPath[WRITE_FD]);
                 close(fdData[READ_FD]);
                 // close(READ_FD);
@@ -46,10 +57,10 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
                 if (dup2(fdPath[READ_FD], 0) == ERROR_CODE || dup2(fdData[WRITE_FD], 1) == ERROR_CODE) {
                     errorHandler("Error performing dup2 in function createChildren (app)");
                 }
-                printf("Termine dup\n");
+
                 close(fdPath[READ_FD]);
                 close(fdData[WRITE_FD]);
-                
+
                 if (execv(path, argv) == ERROR_CODE) {
                     errorHandler("Error performing execv in function createChildren (app)");
                 }
@@ -77,4 +88,22 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
             errorHandler("Error forking in function createChildren (app)");
         }
     }
+}
+
+void sendFiles(Tslave slave, char *fileName, int *taskIndex) {
+
+    //CORREGIR
+    if(!slave.working) {
+
+        fd = slavesArray[slaveIndex].out;
+        fileName = files[i];
+        fileLen = strlen(files[i]);
+
+        if(write(fd, fileName, fileLen) == -1) {
+            errorHandler("Error writing in pathPipe (app)");
+        }
+        slave.working++;
+        (*taskIndex)++;
+    }
+
 }
