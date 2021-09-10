@@ -95,6 +95,8 @@ void sendFiles(Tslave slave, char *fileName, int *taskIndex) {
 
     //CORREGIR
     if(!slave.working) {
+        int fd = slave.out;
+        int fileLen = strlen(fileName);
 
         fd = slavesArray[slaveIndex].out;
         fileName = files[i];
