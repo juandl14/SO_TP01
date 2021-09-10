@@ -32,6 +32,7 @@
 void errorHandler(const char *);
 void closeSemaphore(sem_t *);
 void unlinkSemaphore();
-void openSharedMemory(void *,int *,int,int);
+void unmapSharedMemory(char *, int );
+void unlinkSharedMemory();
 
 #endif

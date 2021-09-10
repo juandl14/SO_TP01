@@ -21,26 +21,14 @@ void unlinkSemaphore() {
     }
 }
 
-void openSharedMemory(void * shMemory, int * shmFd, int setSize, int size) {
-    *shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0); //todo mode
-    if(*shmFd == ERROR_CODE) {
-        errorHandler("Error opening shared memory");
+void unmapSharedMemory(char * memory, int size) {
+    if(munmap(memory,size) == ERROR_CODE) {
+        errorHandler("Error unmapping shared memory (view)");
     }
-
-    if (setSize == TRUE) {
-        if(ftruncate(*shmFd,size) == ERROR_CODE) {
-            errorHandler("Error setting size to shared memory");
-        }
-    }
-
-    shMemory = mmap(0,size,PROT_READ | PROT_WRITE,MAP_SHARED,*shmFd,0); // todo prot
-    if(shMemory == MAP_FAILED) {
-        errorHandler("Error mapping shared memory");
-    }
-
-    return;
 }
 
-void closeSharedMemory() {
-
+void unlinkSharedMemory() {
+    if(shm_unlink(SHM_NAME)==ERROR_CODE) {
+        errorHandler("Error unlinking shared memory");
+    }
 }

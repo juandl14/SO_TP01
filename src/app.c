@@ -16,13 +16,15 @@ int main(int argc, char *argv[]) {
 
     Tslave slavesArray[slaveAmount];
 
-    // Opening shared memory and semaphores
+
+    /* 
+    ** Opening shared memory and semaphores 
+    */
     int shmFd;
     void * shMemory;
-    int shmSize = taskCount*BUFFER_SIZE;
+    int shmSize = taskCount * BUFFER_SIZE;
 
-    shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0); //todo mode
-    if(shmFd == ERROR_CODE) {
+    if((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (app)");
     }
 
@@ -44,7 +46,10 @@ int main(int argc, char *argv[]) {
     
     write(stdout, &shmSize, sizeof(int));
 
-    //Handling slaves
+
+    /* 
+    ** Handling slaves
+    */
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
     // Send first files to the slaves
@@ -64,8 +69,16 @@ int main(int argc, char *argv[]) {
 
     }
 
+
+    /*
+    ** Closing shared memory and semaphores
+    */
     closeSemaphore(sem);
     unlinkSemaphore();
+    
+    close(shmFd);
+    unmapSharedMemory(shMemory,shmSize);
+    unlinkSharedMemory();
 }
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {

@@ -24,6 +24,10 @@ int main(int argc, char *argv[]) {
     char * shMemory;
     sem_t * sem;
     
+    if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        errorHandler("Error opening semaphore (view)");
+    }
+
     //TODO mode and permissions
     if((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDONLY,0)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (view)");
@@ -34,9 +38,6 @@ int main(int argc, char *argv[]) {
         errorHandler("Error mapping shared memory (view)");
     }
 
-    if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        errorHandler("Error opening semaphore (view)");
-    }
 
 
     // Showing results
@@ -45,16 +46,10 @@ int main(int argc, char *argv[]) {
 
     // Closing shared memory and semaphores
     closeSemaphore(sem);
-
-    if(munmap(shMemory,shmSize) == ERROR_CODE) {
-        errorHandler("Error unmapping shared memory (view)");
-    }
-
     close(shmFd);
 
-    if(shm_unlink(SHM_NAME)==ERROR_CODE) {
-        errorHandler("Error unlinking shared memory (view)");
-    }
+    unmapSharedMemory(shMemory,shmSize);
+    unlinkSharedMemory();
 
 
     /* Machete de SH M:
