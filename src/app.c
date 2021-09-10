@@ -1,7 +1,5 @@
 #include "app.h"
 
-void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
-
 int main(int argc, char *argv[]) {
 
     if (argc < 2) {
@@ -23,11 +21,19 @@ int main(int argc, char *argv[]) {
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
     // Send first files to the slaves
-    int taskIndex = 0;
+    int tasksInProgress = 0;
+    int tasksFinished = 0;
 
     for(int slaveIndex = 0; slaveIndex < slaveAmount; i++) {
 
-        sendFiles(slavesArray[slaveIndex], argv[], &taskIndex);
+        sendInitFiles(slavesArray[slaveIndex], argv[], &tasksInProgress);
+
+    }
+
+    //FALTA (se necesita share memory y semaphore)
+    while(tasksFinished < taskCount) {
+        fd_set readFdSet;
+        FD_ZERO(&readFdSet);
 
     }
 }
@@ -91,22 +97,35 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
     }
 }
 
-void sendFiles(Tslave slave, char *fileName, int *taskIndex) {
+void endChildren(Tslave slavesArray[], int slaveAmount) {
 
-    //CORREGIR
-    if(!slave.working) {
+    for(int i = 0; i < slaveAmount) {
+
+        if(close(slavesArray[i].in) == -1) {
+            errorHandler("Error closing read end of fdData (app)");
+        }
+
+        if(close(slavesArray[i].out) == -1) {
+            errorHandler("Error closing write end of fdData (app)");
+        }
+
+    }
+}
+
+void sendInitFiles(Tslave slave, char *fileName, int *taskIndex) {
+
         int fd = slave.out;
         int fileLen = strlen(fileName);
 
-        fd = slavesArray[slaveIndex].out;
-        fileName = files[i];
-        fileLen = strlen(files[i]);
-
         if(write(fd, fileName, fileLen) == -1) {
-            errorHandler("Error writing in pathPipe (app)");
+            errorHandler("Error writing in fdPath (app)");
         }
-        slave.working++;
+
+        if(write(fd, "/n", 1) == -1) {
+            errorHandler("Error writing in fdPath (app)");
+        }
+
+        slave.working = 1;
         (*taskIndex)++;
-    }
 
 }

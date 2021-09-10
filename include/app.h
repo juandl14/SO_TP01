@@ -9,6 +9,7 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/select.h>
 // #include <semaphore.h>
 // #include <fcntl.h>           /* For O_* constants */
 // #include <sys/stat.h>        /* For mode constants */
@@ -26,5 +27,9 @@ typedef struct slave {
     int out;
     int working;
 } Tslave;
+
+void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
+void endChildren(Tslave slavesArray[], int slaveAmount);
+void sendInitFiles(Tslave slave, char *fileName, int *taskIndex);
 
 #endif
