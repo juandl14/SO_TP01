@@ -18,9 +18,12 @@ int main(int argc, char *argv[]) {
 
     int shmFd;
     void * shMemory;
-    openSharedMemory(shMemory, &shmFd, TRUE, taskCount*BUFFER_SIZE);
+    int shmSize = taskCount*BUFFER_SIZE;
+    openSharedMemory(shMemory, &shmFd, TRUE, shmSize);
 
     sem_t *sem = openSemaphore();
+
+    //write(stdout, &shmSize, sizeof(int));
 
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 

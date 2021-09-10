@@ -19,10 +19,13 @@
 
 #define ERROR_CODE -1
 #define ERROR_MSG 100
+
 #define TRUE 1
 #define FALSE 0
+
 #define SEM_NAME "/sem"
 #define SHM_NAME "/shMemory"
+
 #define BUFFER_SIZE 1024
 
 void errorHandler(const char *);
