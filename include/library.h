@@ -23,13 +23,15 @@
 #define TRUE 1
 #define FALSE 0
 
-#define SEM_NAME "/sem"
+#define INIT_VAL_SEM 1
+#define SEM_NAME "/semaphore"
 #define SHM_NAME "/shMemory"
 
 #define BUFFER_SIZE 1024
 
 void errorHandler(const char *);
-sem_t *openSemaphore();
+void closeSemaphore(sem_t *);
+void unlinkSemaphore();
 void openSharedMemory(void *,int *,int,int);
 
 #endif

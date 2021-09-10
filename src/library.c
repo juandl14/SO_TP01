@@ -8,12 +8,17 @@ void errorHandler(const char *errorMsg) {
     exit(EXIT_FAILURE);
 }
 
-sem_t *openSemaphore() {
-    sem_t *sem;
-    if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0)) == SEM_FAILED) {
-        errorHandler("Error opening semaphore in function openSemaphore (app)");
+void closeSemaphore(sem_t * sem) {
+    if(sem_close(sem) == ERROR_CODE) {
+        unlinkSemaphore();
+        errorHandler("Error closing semaphore");
     }
-    return sem;
+}
+
+void unlinkSemaphore() {
+    if(sem_close(SEM_NAME) == ERROR_CODE) {
+        errorHandler("Error unlinking semaphore");
+    }
 }
 
 void openSharedMemory(void * shMemory, int * shmFd, int setSize, int size) {
@@ -34,4 +39,8 @@ void openSharedMemory(void * shMemory, int * shmFd, int setSize, int size) {
     }
 
     return;
+}
+
+void closeSharedMemory() {
+
 }

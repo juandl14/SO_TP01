@@ -16,24 +16,44 @@ int main(int argc, char *argv[]) {
 
     Tslave slavesArray[slaveAmount];
 
+    // Opening shared memory and semaphores
     int shmFd;
     void * shMemory;
     int shmSize = taskCount*BUFFER_SIZE;
+
+    shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0); //todo mode
+    if(shmFd == ERROR_CODE) {
+        errorHandler("Error opening shared memory (app)");
+    }
+
+    if(ftruncate(shmFd,shmSize) == ERROR_CODE) {
+        errorHandler("Error setting size to shared memory (app)");
+    }
+
+    shMemory = mmap(0,shmSize,PROT_READ | PROT_WRITE,MAP_SHARED,shmFd,0); // todo prot
+    if(shMemory == MAP_FAILED) {
+        errorHandler("Error mapping shared memory (app)");
+    }
+
     openSharedMemory(shMemory, &shmFd, TRUE, shmSize);
 
-    sem_t *sem = openSemaphore();
+    sem_t *sem; //TODO see permissions and flags
+    if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
+        errorHandler("Error opening semaphore (app)");
+    }
+    
+    write(stdout, &shmSize, sizeof(int));
 
-    //write(stdout, &shmSize, sizeof(int));
-
+    //Handling slaves
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
     // Send first files to the slaves
     int tasksInProgress = 0;
     int tasksFinished = 0;
 
-    for(int slaveIndex = 0; slaveIndex < slaveAmount; i++) {
+    for(int slaveIndex = 0; slaveIndex < slaveAmount; i++) { //undefined i
 
-        sendInitFiles(slavesArray[slaveIndex], argv[], &tasksInProgress);
+        sendInitFiles(slavesArray[slaveIndex], argv[], &tasksInProgress);//todo
 
     }
 
@@ -43,6 +63,9 @@ int main(int argc, char *argv[]) {
         FD_ZERO(&readFdSet);
 
     }
+
+    closeSemaphore(sem);
+    unlinkSemaphore();
 }
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {
@@ -106,7 +129,7 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
 
 void endChildren(Tslave slavesArray[], int slaveAmount) {
 
-    for(int i = 0; i < slaveAmount) {
+    for(int i = 0; i < slaveAmount;) {//todo
 
         if(close(slavesArray[i].in) == -1) {
             errorHandler("Error closing read end of fdData (app)");

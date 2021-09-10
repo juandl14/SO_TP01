@@ -21,13 +21,40 @@ int main(int argc, char *argv[]) {
 
     // Opening shared memory and semaphores
     int shmFd;
-    void * shMemory;
-    openSharedMemory(shMemory, &shmFd, FALSE, FALSE);
+    char * shMemory;
+    sem_t * sem;
     
-    // Doing task
+    //TODO mode and permissions
+    if((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDONLY,0)) == ERROR_CODE) {
+        errorHandler("Error opening shared memory (view)");
+    }
 
-    // Closing shared memory
+    // TODO prot
+    if((shMemory = (char *) mmap(0,shmSize,PROT_READ | PROT_WRITE,MAP_SHARED,shmFd,0)) == MAP_FAILED) {
+        errorHandler("Error mapping shared memory (view)");
+    }
 
+    if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        errorHandler("Error opening semaphore (view)");
+    }
+
+
+    // Showing results
+    handleData(sem,shMemory);
+
+
+    // Closing shared memory and semaphores
+    closeSemaphore(sem);
+
+    if(munmap(shMemory,shmSize) == ERROR_CODE) {
+        errorHandler("Error unmapping shared memory (view)");
+    }
+
+    close(shmFd);
+
+    if(shm_unlink(SHM_NAME)==ERROR_CODE) {
+        errorHandler("Error unlinking shared memory (view)");
+    }
 
 
     /* Machete de SH M:
@@ -41,4 +68,18 @@ int main(int argc, char *argv[]) {
     ** close(2)		cerrar el file descriptor
     ** shm_unlink(3)		borrar la entrada del file system
     */
+}
+
+void handleData(sem_t * sem,char * shMemory) {
+    while(1) {
+        if(sem_wait(sem)==ERROR_CODE) {
+            errorHandler("Error: sem_wait has failed (view)");
+        }
+
+        if(*shMemory == 0) {
+            break;
+        }
+        int move = printf("%s",shMemory);
+        shMemory += move + 1;
+    }
 }
