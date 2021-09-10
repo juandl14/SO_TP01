@@ -1,6 +1,7 @@
 #include "app.h"
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
+sem_t *openSemaphore();
 
 int main(int argc, char *argv[]) {
 
@@ -17,6 +18,8 @@ int main(int argc, char *argv[]) {
     FILE *resultFile;
 
     Tslave slavesArray[slaveAmount];
+
+    sem_t *sem = openSemaphore();
 
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
@@ -105,4 +108,12 @@ void sendFiles(Tslave slave, char *fileName, int *taskIndex) {
         (*taskIndex)++;
     }
 
+}
+
+sem_t *openSemaphore() {
+    sem_t *sem;
+    if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0)) == SEM_FAILED) {
+        errorHandler("Error opening semaphore in function openSemaphore (app)");
+    }
+    return sem;
 }

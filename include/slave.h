@@ -9,6 +9,10 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
+#include <errors.h>
+#include <semaphore.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
 
 #include "library.h"
 
