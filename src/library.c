@@ -18,7 +18,7 @@ sem_t *openSemaphore() {
 
 void openSharedMemory(void * shMemory, int * shmFd, int setSize, int size) {
     *shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0); //todo mode
-    if(shmFd == ERROR_CODE) {
+    if(*shmFd == ERROR_CODE) {
         errorHandler("Error opening shared memory");
     }
 
@@ -28,7 +28,7 @@ void openSharedMemory(void * shMemory, int * shmFd, int setSize, int size) {
         }
     }
 
-    *shMemory = mmap(0,shmSize,PROT_READ | PROT_WRITE,MAP_SHARED,shmFd,0); // todo prot
+    shMemory = mmap(0,size,PROT_READ | PROT_WRITE,MAP_SHARED,*shmFd,0); // todo prot
     if(shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory");
     }

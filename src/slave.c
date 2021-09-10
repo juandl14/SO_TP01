@@ -16,7 +16,7 @@ int main(int argc, const char *argv[]) {
 }
 
 void solver(const char *fileName) {
-    char command[BUFFER] = {0};
+    char command[BUFFER_SIZE] = {0};
 
     if (sprintf(command,"minisat %s | /bin/grep -o -e \"Number of.*[0-9]\\+\" -e \"CPU time.*\" -e \".*SATISFIABLE\"",fileName) < 0) {
         errorHandler("Error performing sprintf in function solver (slave)");
@@ -27,10 +27,10 @@ void solver(const char *fileName) {
         errorHandler("Error performing popen in function solver (slave)");
     }
 
-    char input[BUFFER/2]={0};
-    fread(input,sizeof(char),BUFFER,fd);
+    char input[BUFFER_SIZE/2]={0};
+    fread(input,sizeof(char),BUFFER_SIZE,fd);
 
-    char output[BUFFER];
+    char output[BUFFER_SIZE];
     sprintf(output,"PID: %d\nFile: %s\n%s\n",getpid(),fileName,input);
     write(WRITE_FD,output,strlen(output)+1);
 

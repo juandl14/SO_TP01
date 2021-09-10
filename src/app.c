@@ -16,6 +16,10 @@ int main(int argc, char *argv[]) {
 
     Tslave slavesArray[slaveAmount];
 
+    int shmFd;
+    void * shMemory;
+    openSharedMemory(shMemory, &shmFd, TRUE, taskCount*BUFFER_SIZE);
+
     sem_t *sem = openSemaphore();
 
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);

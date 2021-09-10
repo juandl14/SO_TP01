@@ -19,11 +19,11 @@ int main(int argc, char *argv[]) {
         errorHandler("Error defining size of shared memory (view)");
     }
 
-    // Opening shared memory
-
+    // Opening shared memory and semaphores
     int shmFd;
     void * shMemory;
     openSharedMemory(shMemory, &shmFd, FALSE, FALSE);
+    
     // Doing task
 
     // Closing shared memory
