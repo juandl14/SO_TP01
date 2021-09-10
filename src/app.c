@@ -23,16 +23,13 @@ int main(int argc, char *argv[]) {
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
     // Send first files to the slaves
-    int tasksInProgress = 0;
-    int tasksFinished = 0;
+    int taskIndex = 0;
 
     for(int slaveIndex = 0; slaveIndex < slaveAmount; i++) {
 
-        sendInitFiles(slavesArray[slaveIndex], argv[], &tasksInProgress);
+        sendFiles(slavesArray[slaveIndex], argv[], &taskIndex);
 
     }
-
-
 }
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {
@@ -94,20 +91,20 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
     }
 }
 
-void sendInitFiles(Tslave slave, char *fileName, int *taskIndex) {
+void sendFiles(Tslave slave, char *fileName, int *taskIndex) {
 
-        int fd = slave.out;
-        int fileLen = strlen(files[i]);
+    //CORREGIR
+    if(!slave.working) {
+
+        fd = slavesArray[slaveIndex].out;
+        fileName = files[i];
+        fileLen = strlen(files[i]);
 
         if(write(fd, fileName, fileLen) == -1) {
             errorHandler("Error writing in pathPipe (app)");
         }
-
-        if(write(fd, "/n", 1) == -1) {
-            errorHandler("Error writing in pathPipe (app)");
-        }
-
-        slave.working = 1;
+        slave.working++;
         (*taskIndex)++;
+    }
 
 }

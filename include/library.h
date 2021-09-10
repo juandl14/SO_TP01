@@ -12,7 +12,6 @@
 #define ERROR_CODE -1
 #define ERROR_MSG 100
 #define SEM_NAME "/sem"
-#define SHM_NAME "/shMemory"
 
 void errorHandler(const char *errorMsg);
 sem_t *openSemaphore();

@@ -1,5 +1,5 @@
 #ifndef VIEW_H
-#define VIEW_H
+#define VIEW_h
 
 #include <stdio.h>
 #include <sys/mman.h>
@@ -12,5 +12,6 @@
 
 #define READ_FD 0
 #define WRITE_FD 1
+#define SHM_NAME "/shMemory"
 
 #endif
