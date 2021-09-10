@@ -2,13 +2,15 @@
 
 int main(int argc, char *argv[]) {
 
-    // Initializing and defining size for shared memory
+    // Reciving data to initialize
     int shmSize;
 
     if (argc == 1) {
-
+        if(read(stdin,&shmSize,sizeof(int)) == ERROR_CODE) {
+            errorHandler("Error reading data for initializing shared memory (view)");
+        }
     } else if (argc == 2) {
-
+        shmSize = atoi(argv[1]);
     } else {
         errorHandler("Error: invalid amount of arguments (view)");
     }
