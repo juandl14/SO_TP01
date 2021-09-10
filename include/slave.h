@@ -9,9 +9,8 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
-#include <errors.h>
 
-#include "errors.h"
+#include "library.h"
 
 #define BUFFER 2048
 #define READ_FD 0

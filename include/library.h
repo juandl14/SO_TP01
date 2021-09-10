@@ -1,5 +1,5 @@
-#ifndef ERRORS_H
-#define ERRORS_H
+#ifndef LIBRARY_H
+#define LIBRARY_H
 
 #include <stdio.h>
 #include <stdlib.h>

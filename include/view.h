@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "errors.h"
+#include "library.h"
 
 #define READ_FD 0
 #define WRITE_FD 1

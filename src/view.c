@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     if(shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (view)");
     }
+    
     // Doing task
 
     // Closing shared memory

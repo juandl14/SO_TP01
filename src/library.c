@@ -1,4 +1,4 @@
-#include <errors.h>
+#include "library.h"
 
 void errorHandler(const char *errorMsg) {
     char finalMsg[ERROR_MSG]={0};
