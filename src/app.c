@@ -5,8 +5,7 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
 int main(int argc, char *argv[]) {
 
     if (argc < 2) {
-        fprintf(stderr, "%s\n", "Incorrect amount of arguments");
-        exit(EXIT_FAILURE);
+        errorHandler("Error: incorrect amount of arguments (app)");
     }
 
     /* If I have less arguments than SLAVE_AMOUNT, I create

@@ -1,7 +1,6 @@
 #include "slave.h"
-#include "errors.h"
 
-int main(int argc, char const *argv[]) {
+int main(int argc, const char *argv[]) {
 
     if(setvbuf(stdout, NULL, _IONBF, 0) != 0) {
         errorHandler("Error performing setvbuf in main (slave)");

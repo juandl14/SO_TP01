@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <errors.h>
 
+#include "errors.h"
+
 #define BUFFER 2048
 #define READ_FD 0
 #define WRITE_FD 1
