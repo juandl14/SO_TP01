@@ -20,16 +20,17 @@
 #define ERROR_CODE -1
 #define ERROR_MSG 100
 
-#define TRUE 1
-#define FALSE 0
-
-#define INIT_VAL_SEM 1
+#define INIT_VAL_SEM 0
 #define SEM_NAME "/semaphore"
 #define SHM_NAME "/shMemory"
 
 #define BUFFER_SIZE 1024
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 void errorHandler(const char *);
+void postSemaphore(sem_t *);
+void waitSemaphore(sem_t *);
 void closeSemaphore(sem_t *);
 void unlinkSemaphore();
 void unmapSharedMemory(char *, int );

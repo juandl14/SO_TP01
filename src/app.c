@@ -10,15 +10,16 @@ int main(int argc, char *argv[]) {
     ** as many children as arguments, since I do not want more children than arguments
     */
     int taskCount = argc - 1;
-    int slaveAmount = (SLAVE_AMOUNT > taskCount)? taskCount : SLAVE_AMOUNT;
+    int slaveAmount =  MAX(SLAVE_AMOUNT,taskCount);
+    int filesPerSlave = (taskCount/SLAVE_AMOUNT >= 2)? 2 : 1;
 
     FILE *resultFile;
 
     Tslave slavesArray[slaveAmount];
 
 
-    /* 
-    ** Opening shared memory and semaphores 
+    /*
+    ** Opening shared memory and semaphores
     */
     int shmFd;
     void * shMemory;
@@ -37,18 +38,17 @@ int main(int argc, char *argv[]) {
         errorHandler("Error mapping shared memory (app)");
     }
 
-    openSharedMemory(shMemory, &shmFd, TRUE, shmSize);
-
     sem_t *sem; //TODO see permissions and flags
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }
-    
+
+    sleep(2);
     write(stdout, &shmSize, sizeof(int));
 
 
-    /* 
-    ** Handling slaves
+    /*
+    ** Handling slaves and files
     */
     createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
@@ -56,26 +56,50 @@ int main(int argc, char *argv[]) {
     int tasksInProgress = 0;
     int tasksFinished = 0;
 
-    for(int slaveIndex = 0; slaveIndex < slaveAmount; i++) { //undefined i
+    int initialPaths = filesPerSlave * slaveAmount;
+    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksInProgress);
 
-        sendInitFiles(slavesArray[slaveIndex], argv[], &tasksInProgress);//todo
+    char buffer[BUFFER_SIZE] = {0};
 
-    }
-
-    //FALTA (se necesita share memory y semaphore)
     while(tasksFinished < taskCount) {
         fd_set readFdSet;
         FD_ZERO(&readFdSet);
 
+        int max = chargeReadSet(&readFdSet, slavesArray, slaveAmount);
+
+        if(select(max + 1, &readFdSet, NULL, NULL, NULL) == -1) {
+            errorHandler("Error in select (app)");
+        }
+
+        for(int i = 0; i < slaveAmount; i++) {
+            int fd = slavesArray[i].in;
+            if(FD_ISSET(fd, &readFdSet)) {
+
+                int dimRead = read(fd, buffer, BUFFER_SIZE);
+                if(dimRead == ERROR_CODE) {
+                    errorHandler("Error reading from fdData (app)");
+                }
+                if(dimRead == 0) {
+                    slavesArray[i].working = 0;
+                }
+
+                int move = fprintf(shMemory, "%s\n", buffer);
+                shMemory += (move + 1) * sizeof(*shMemory);
+                postSemaphore(sem);
+            }
+
+        }
+
     }
 
+    endChildren(slavesArray, slaveAmount);
 
     /*
     ** Closing shared memory and semaphores
     */
     closeSemaphore(sem);
     unlinkSemaphore();
-    
+
     close(shmFd);
     unmapSharedMemory(shMemory,shmSize);
     unlinkSharedMemory();
@@ -142,33 +166,47 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
 
 void endChildren(Tslave slavesArray[], int slaveAmount) {
 
-    for(int i = 0; i < slaveAmount;) {//todo
+    for(int i = 0; i < slaveAmount; i++) {//todo
 
-        if(close(slavesArray[i].in) == -1) {
+        if(close(slavesArray[i].in) ==ERROR_CODE) {
             errorHandler("Error closing read end of fdData (app)");
         }
 
-        if(close(slavesArray[i].out) == -1) {
+        if(close(slavesArray[i].out) == ERROR_CODE) {
             errorHandler("Error closing write end of fdData (app)");
         }
 
     }
 }
 
-void sendInitFiles(Tslave slave, char *fileName, int *taskIndex) {
+void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress) {
 
-        int fd = slave.out;
-        int fileLen = strlen(fileName);
-
-        if(write(fd, fileName, fileLen) == -1) {
+    for(int currentTask = 0; currentTask < ; currentTask++) {
+        if(write(slavesArray[currentTask % slaveAmount].out, fileName[i], strlen(fileName[i])) == -1){
             errorHandler("Error writing in fdPath (app)");
         }
 
-        if(write(fd, "/n", 1) == -1) {
+        if(write(slavesArray[currentTask % slaveAmount].out, "/n", 1) == -1) {
             errorHandler("Error writing in fdPath (app)");
         }
 
-        slave.working = 1;
-        (*taskIndex)++;
+        (*tasksInProgress)++;
+        slavesArray[currentTask % slaveAmount].working++;
+    }
 
+}
+
+int chargeReadSet(fd_set fdReadSet, Tslave slavesArray[], int slaveAmount) {
+    int max = -1;
+    int currentFd;
+
+    for(int i = 0; i < slaveAmount; i++) {
+        if(slavesArray[i].working) {
+            currentFd = slavesArray[i].in
+
+            FD_SET(currentFd, fdReadSet);
+            max = MAX(max, currentFd);
+        }
+    }
+    return max;
 }

@@ -8,6 +8,18 @@ void errorHandler(const char *errorMsg) {
     exit(EXIT_FAILURE);
 }
 
+void postSemaphore(sem_t *sem) {
+    if(sem_post(sem)==ERROR_CODE) {
+        errorHandler("Error in sem_post");
+    }
+}
+
+void waitSemaphore(sem_t * sem) {
+  if(sem_wait(sem)==ERROR_CODE) {
+      errorHandler("Error: sem_wait has failed (view)");
+  }
+}
+
 void closeSemaphore(sem_t * sem) {
     if(sem_close(sem) == ERROR_CODE) {
         unlinkSemaphore();

@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     int shmFd;
     char * shMemory;
     sem_t * sem;
-    
+
     if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (view)");
     }
@@ -34,10 +34,9 @@ int main(int argc, char *argv[]) {
     }
 
     // TODO prot
-    if((shMemory = (char *) mmap(0,shmSize,PROT_READ | PROT_WRITE,MAP_SHARED,shmFd,0)) == MAP_FAILED) {
+    if((shMemory = (char *) mmap(0,shmSize,PROT_READ,MAP_SHARED,shmFd,0)) == MAP_FAILED) {
         errorHandler("Error mapping shared memory (view)");
     }
-
 
 
     // Showing results
@@ -50,31 +49,15 @@ int main(int argc, char *argv[]) {
 
     unmapSharedMemory(shMemory,shmSize);
     unlinkSharedMemory();
-
-
-    /* Machete de SH M:
-    ** shmopen(3)		abrir, no toma tamaño
-    ** ftruncate(2)		dar tamaño a la memoria
-    ** char * ptr;
-    ** ptr = mmap(2)		mapea la memoria en el espacio de direcciones del mapeo,
-    ** asignalo en donde quierass (null) pero decime dónde ocn ptr
-		** laburamos con la memoria como si fuera un array o un malloc
-    ** munmap(2)		sacar el mapa
-    ** close(2)		cerrar el file descriptor
-    ** shm_unlink(3)		borrar la entrada del file system
-    */
 }
 
 void handleData(sem_t * sem,char * shMemory) {
     while(1) {
-        if(sem_wait(sem)==ERROR_CODE) {
-            errorHandler("Error: sem_wait has failed (view)");
-        }
-
+        waitSemaphore(sem);
         if(*shMemory == 0) {
             break;
         }
         int move = printf("%s",shMemory);
-        shMemory += move + 1;
+        shMemory += (move + 1) * sizeof(*shMemory);
     }
 }
