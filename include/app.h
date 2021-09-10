@@ -9,11 +9,9 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <string.h>
-#include <semaphore.h>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
-#include "defs.h"
-
+// #include <semaphore.h>
+// #include <fcntl.h>           /* For O_* constants */
+// #include <sys/stat.h>        /* For mode constants */
 #include "library.h"
 
 #define SLAVE_AMOUNT 8
