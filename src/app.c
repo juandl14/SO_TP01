@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
         FD_ZERO(&readFdSet);
 
         // int max = chargeReadSet(&readFdSet, slavesArray, slaveAmount);
+
         //
         int max = -1;
         int currentFd;
@@ -77,34 +78,35 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < slaveAmount; i++) {
             if(slavesArray[i].working) {
                 currentFd = slavesArray[i].in;
-
-                FD_SET(currentFd, &readFdSet);
                 max = MAX(max, currentFd);
+                FD_SET(currentFd, &readFdSet);
             }
         }
         //
 
-        if(select(max + 1, &readFdSet, NULL, NULL, NULL) == ERROR_CODE) {
+        int ready;
+        if((ready = select(max + 1, &readFdSet, NULL, NULL, NULL)) == ERROR_CODE) {
             errorHandler("Error in select (app)");
         }
 
-        for(int i = 0; i < slaveAmount; i++) {
+        for(int i = 0; i < slaveAmount && ready > 0; i++) {
             int fd = slavesArray[i].in;
             if(FD_ISSET(fd, &readFdSet)) {
                 // printf("entro");
                 int dimRead = read(fd, buffer, BUFFER_SIZE);
-                if(dimRead == ERROR_CODE) {
+                if (dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
-                }
-                if(dimRead == 0) {
+                } else if (dimRead <= 0) {
                     slavesArray[i].working = 0;
+                    // continue;
                     // tasksFinished++;
+                } else {
+                    tasksFinished++;
+                    ready--;
+                    int move = fprintf(shMemory, "%s\n", buffer);
+                    shMemory += (move + 1) * sizeof(*shMemory);
+                    postSemaphore(sem);
                 }
-
-                tasksFinished++;
-                int move = fprintf(shMemory, "%s\n", buffer);
-                shMemory += (move + 1) * sizeof(*shMemory);
-                postSemaphore(sem);
 
             }
 
