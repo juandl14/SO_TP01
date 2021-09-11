@@ -1,4 +1,4 @@
-#include "view.h"
+#include <view.h>
 
 int main(int argc, char *argv[]) {
 
@@ -6,7 +6,7 @@ int main(int argc, char *argv[]) {
     int shmSize;
 
     if (argc == 1) {
-        if(read(stdin,&shmSize,sizeof(int)) == ERROR_CODE) {
+        if(read(STDIN, &shmSize, sizeof(int)) == ERROR_CODE) {
             errorHandler("Error reading data for initializing shared memory (view)");
         }
     } else if (argc == 2) {

@@ -1,7 +1,7 @@
-#include "library.h"
+#include <library.h>
 
 void errorHandler(const char *errorMsg) {
-    char finalMsg[ERROR_MSG]={0};
+    char finalMsg[ERROR_MSG] = {0};
     strcat(finalMsg,errorMsg);
     strcat(finalMsg,"\n");
     perror(finalMsg);
@@ -9,29 +9,29 @@ void errorHandler(const char *errorMsg) {
 }
 
 void postSemaphore(sem_t *sem) {
-    if(sem_post(sem)==ERROR_CODE) {
+    if(sem_post(sem) == ERROR_CODE) {
         errorHandler("Error in sem_post");
     }
 }
 
 void waitSemaphore(sem_t * sem) {
-  if(sem_wait(sem)==ERROR_CODE) {
+  if(sem_wait(sem) == ERROR_CODE) {
       errorHandler("Error: sem_wait has failed (view)");
   }
 }
 
 void closeSemaphore(sem_t * sem) {
     if(sem_close(sem) == ERROR_CODE) {
-        unlinkSemaphore();
+        // unlinkSemaphore();
         errorHandler("Error closing semaphore");
     }
 }
 
-void unlinkSemaphore() {
-    if(sem_close(SEM_NAME) == ERROR_CODE) {
-        errorHandler("Error unlinking semaphore");
-    }
-}
+// void unlinkSemaphore() {
+//     if(sem_close(SEM_NAME) == ERROR_CODE) {
+//         errorHandler("Error unlinking semaphore");
+//     }
+// }
 
 void unmapSharedMemory(char * memory, int size) {
     if(munmap(memory,size) == ERROR_CODE) {

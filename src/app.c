@@ -1,4 +1,4 @@
-#include "app.h"
+#include <app.h>
 
 int main(int argc, char *argv[]) {
 
@@ -13,10 +13,9 @@ int main(int argc, char *argv[]) {
     int slaveAmount =  MAX(SLAVE_AMOUNT,taskCount);
     int filesPerSlave = (taskCount/SLAVE_AMOUNT >= 2)? 2 : 1;
 
-    FILE *resultFile;
+    // FILE *resultFile;
 
     Tslave slavesArray[slaveAmount];
-
 
     /*
     ** Opening shared memory and semaphores
@@ -44,7 +43,7 @@ int main(int argc, char *argv[]) {
     }
 
     sleep(2);
-    write(stdout, &shmSize, sizeof(int));
+    write(STDOUT, &shmSize, sizeof(int));
 
 
     /*
@@ -98,7 +97,7 @@ int main(int argc, char *argv[]) {
     ** Closing shared memory and semaphores
     */
     closeSemaphore(sem);
-    unlinkSemaphore();
+    // unlinkSemaphore();
 
     close(shmFd);
     unmapSharedMemory(shMemory,shmSize);
@@ -166,9 +165,9 @@ void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *
 
 void endChildren(Tslave slavesArray[], int slaveAmount) {
 
-    for(int i = 0; i < slaveAmount; i++) {//todo
+    for(int i = 0; i < slaveAmount; i++) { //todo
 
-        if(close(slavesArray[i].in) ==ERROR_CODE) {
+        if(close(slavesArray[i].in) == ERROR_CODE) {
             errorHandler("Error closing read end of fdData (app)");
         }
 
@@ -181,8 +180,8 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
 
 void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress) {
 
-    for(int currentTask = 0; currentTask < ; currentTask++) {
-        if(write(slavesArray[currentTask % slaveAmount].out, fileName[i], strlen(fileName[i])) == -1){
+    for(int currentTask = 0; currentTask < initialPaths /*capaz no es esto*/; currentTask++) {
+        if(write(slavesArray[currentTask % slaveAmount].out, fileName[currentTask], strlen(fileName[currentTask])) == -1) {
             errorHandler("Error writing in fdPath (app)");
         }
 
@@ -196,13 +195,13 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
 
 }
 
-int chargeReadSet(fd_set fdReadSet, Tslave slavesArray[], int slaveAmount) {
+int chargeReadSet(fd_set *fdReadSet, Tslave slavesArray[], int slaveAmount) {
     int max = -1;
     int currentFd;
 
     for(int i = 0; i < slaveAmount; i++) {
         if(slavesArray[i].working) {
-            currentFd = slavesArray[i].in
+            currentFd = slavesArray[i].in;
 
             FD_SET(currentFd, fdReadSet);
             max = MAX(max, currentFd);

@@ -1,12 +1,10 @@
 #ifndef SOLVE_H
 #define SOLVE_H
 
-#include "library.h"
+#include <library.h>
 
 #define SLAVE_AMOUNT 8
 #define SLAVE_PATH "./Slave"
-#define READ_FD 0
-#define WRITE_FD 1
 #define TASK_MAX_CAP 2
 
 typedef struct slave {
@@ -18,6 +16,7 @@ typedef struct slave {
 
 void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]);
 void endChildren(Tslave slavesArray[], int slaveAmount);
-void sendInitFiles(Tslave slave, char *fileName, int *taskIndex);
+void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress);
+int chargeReadSet(fd_set *fdReadSet, Tslave slavesArray[], int slaveAmount);
 
 #endif

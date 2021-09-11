@@ -23,6 +23,10 @@
 #define INIT_VAL_SEM 0
 #define SEM_NAME "/semaphore"
 #define SHM_NAME "/shMemory"
+#define STDIN 0
+#define STDOUT 1
+#define READ_FD 0
+#define WRITE_FD 1
 
 #define BUFFER_SIZE 1024
 
@@ -32,7 +36,7 @@ void errorHandler(const char *);
 void postSemaphore(sem_t *);
 void waitSemaphore(sem_t *);
 void closeSemaphore(sem_t *);
-void unlinkSemaphore();
+// void unlinkSemaphore();
 void unmapSharedMemory(char *, int );
 void unlinkSharedMemory();
 
