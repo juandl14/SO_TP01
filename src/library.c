@@ -16,7 +16,7 @@ void postSemaphore(sem_t *sem) {
 
 void waitSemaphore(sem_t * sem) {
   if(sem_wait(sem) == ERROR_CODE) {
-      errorHandler("Error: sem_wait has failed (view)");
+      errorHandler("Error: sem_wait has failed");
   }
 }
 
@@ -35,7 +35,7 @@ void unlinkSemaphore() {
 
 void unmapSharedMemory(char * memory, int size) {
     if(munmap(memory,size) == ERROR_CODE) {
-        errorHandler("Error unmapping shared memory (view)");
+        errorHandler("Error unmapping shared memory");
     }
 }
 
