@@ -1,6 +1,10 @@
-#include <view.h>
+#include "view.h"
 
 int main(int argc, char *argv[]) {
+
+    if (setvbuf(stdin, NULL, _IONBF, 0) != 0) {
+        errorHandler("Error performing setvbuf in main (view)");
+    }
 
     // Reciving data to initialize
     int shmSize;
@@ -24,6 +28,7 @@ int main(int argc, char *argv[]) {
     char * shMemory;
     sem_t * sem;
 
+    // unlinkSemaphore();
     if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (view)");
     }

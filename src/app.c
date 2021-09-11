@@ -1,4 +1,4 @@
-#include <app.h>
+#include "app.h"
 
 int main(int argc, char *argv[]) {
 
@@ -24,20 +24,24 @@ int main(int argc, char *argv[]) {
     void * shMemory;
     int shmSize = taskCount * BUFFER_SIZE;
 
-    if((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
+    if (setvbuf(stdout, NULL, _IONBF, 0) != 0) {
+        errorHandler("Error setting buffer in main (app)");
+    }
+
+    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (app)");
     }
 
-    if(ftruncate(shmFd,shmSize) == ERROR_CODE) {
+    if (ftruncate(shmFd,shmSize) == ERROR_CODE) {
         errorHandler("Error setting size to shared memory (app)");
     }
 
     shMemory = mmap(0,shmSize,PROT_READ | PROT_WRITE,MAP_SHARED,shmFd,0); // todo prot
-    if(shMemory == MAP_FAILED) {
+    if (shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (app)");
     }
 
-    unlinkSemaphore();
+    // unlinkSemaphore();
     sem_t *sem; //TODO see permissions and flags
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
@@ -50,14 +54,14 @@ int main(int argc, char *argv[]) {
     /*
     ** Handling slaves and files
     */
-    createChildren(slavesArray, taskCount, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
+    createChildren(slavesArray, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
     // Send first files to the slaves
     int tasksInProgress = 0;
     int tasksFinished = 0;
 
     int initialPaths = filesPerSlave * slaveAmount;
-    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksInProgress);
+    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksInProgress, &tasksFinished);
 
     char buffer[BUFFER_SIZE] = {0};
 
@@ -65,27 +69,43 @@ int main(int argc, char *argv[]) {
         fd_set readFdSet;
         FD_ZERO(&readFdSet);
 
-        int max = chargeReadSet(&readFdSet, slavesArray, slaveAmount);
+        // int max = chargeReadSet(&readFdSet, slavesArray, slaveAmount);
+        //
+        int max = -1;
+        int currentFd;
 
-        if(select(max + 1, &readFdSet, NULL, NULL, NULL) == -1) {
+        for(int i = 0; i < slaveAmount; i++) {
+            if(slavesArray[i].working) {
+                currentFd = slavesArray[i].in;
+
+                FD_SET(currentFd, &readFdSet);
+                max = MAX(max, currentFd);
+            }
+        }
+        //
+
+        if(select(max + 1, &readFdSet, NULL, NULL, NULL) == ERROR_CODE) {
             errorHandler("Error in select (app)");
         }
 
         for(int i = 0; i < slaveAmount; i++) {
             int fd = slavesArray[i].in;
             if(FD_ISSET(fd, &readFdSet)) {
-
+                // printf("entro");
                 int dimRead = read(fd, buffer, BUFFER_SIZE);
                 if(dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
                 }
                 if(dimRead == 0) {
                     slavesArray[i].working = 0;
+                    // tasksFinished++;
                 }
 
+                tasksFinished++;
                 int move = fprintf(shMemory, "%s\n", buffer);
                 shMemory += (move + 1) * sizeof(*shMemory);
                 postSemaphore(sem);
+
             }
 
         }
@@ -105,7 +125,22 @@ int main(int argc, char *argv[]) {
     unlinkSharedMemory();
 }
 
-void createChildren(Tslave slavesArray[], int taskCount, int slaveAmount, char *path, char *const argv[]) {
+// int chargeReadSet(fd_set *fdReadSet, Tslave slavesArray[], int slaveAmount) {
+//     int max = -1;
+//     int currentFd;
+//
+//     for(int i = 0; i < slaveAmount; i++) {
+//         if(slavesArray[i].working) {
+//             currentFd = slavesArray[i].in;
+//
+//             FD_SET(currentFd, *fdReadSet);
+//             max = MAX(max, currentFd);
+//         }
+//     }
+//     return max;
+// }
+
+void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *const argv[]) {
     pid_t pid;
 
     for (int i = 0; i < slaveAmount; i++) {
@@ -179,7 +214,7 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
     }
 }
 
-void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress) {
+void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress, int *tasksFinished) {
 
     for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
         if(write(slavesArray[currentTask % slaveAmount].out, fileName[i], strlen(fileName[i])) == -1) {
@@ -192,21 +227,7 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
 
         (*tasksInProgress)++;
         slavesArray[currentTask % slaveAmount].working++;
+        //
     }
 
-}
-
-int chargeReadSet(fd_set *fdReadSet, Tslave slavesArray[], int slaveAmount) {
-    int max = -1;
-    int currentFd;
-
-    for(int i = 0; i < slaveAmount; i++) {
-        if(slavesArray[i].working) {
-            currentFd = slavesArray[i].in;
-
-            FD_SET(currentFd, fdReadSet);
-            max = MAX(max, currentFd);
-        }
-    }
-    return max;
 }

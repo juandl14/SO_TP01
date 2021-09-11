@@ -1,4 +1,4 @@
-#include <slave.h>
+#include "slave.h"
 
 int main(int argc, const char *argv[]) {
 
