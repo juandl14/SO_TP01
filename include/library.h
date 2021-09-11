@@ -36,7 +36,7 @@ void errorHandler(const char *);
 void postSemaphore(sem_t *);
 void waitSemaphore(sem_t *);
 void closeSemaphore(sem_t *);
-// void unlinkSemaphore();
+void unlinkSemaphore();
 void unmapSharedMemory(char *, int );
 void unlinkSharedMemory();
 

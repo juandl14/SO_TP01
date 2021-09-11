@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error mapping shared memory (app)");
     }
 
+    unlinkSemaphore();
     sem_t *sem; //TODO see permissions and flags
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
@@ -97,7 +98,7 @@ int main(int argc, char *argv[]) {
     ** Closing shared memory and semaphores
     */
     closeSemaphore(sem);
-    // unlinkSemaphore();
+    unlinkSemaphore();
 
     close(shmFd);
     unmapSharedMemory(shMemory,shmSize);
@@ -180,8 +181,8 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
 
 void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress) {
 
-    for(int currentTask = 0; currentTask < initialPaths /*capaz no es esto*/; currentTask++) {
-        if(write(slavesArray[currentTask % slaveAmount].out, fileName[currentTask], strlen(fileName[currentTask])) == -1) {
+    for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
+        if(write(slavesArray[currentTask % slaveAmount].out, fileName[i], strlen(fileName[i])) == -1) {
             errorHandler("Error writing in fdPath (app)");
         }
 

@@ -22,16 +22,16 @@ void waitSemaphore(sem_t * sem) {
 
 void closeSemaphore(sem_t * sem) {
     if(sem_close(sem) == ERROR_CODE) {
-        // unlinkSemaphore();
+        unlinkSemaphore();
         errorHandler("Error closing semaphore");
     }
 }
 
-// void unlinkSemaphore() {
-//     if(sem_close(SEM_NAME) == ERROR_CODE) {
-//         errorHandler("Error unlinking semaphore");
-//     }
-// }
+void unlinkSemaphore() {
+    if(sem_unlink(SEM_NAME) == ERROR_CODE) {
+        errorHandler("Error unlinking semaphore");
+    }
+}
 
 void unmapSharedMemory(char * memory, int size) {
     if(munmap(memory,size) == ERROR_CODE) {
