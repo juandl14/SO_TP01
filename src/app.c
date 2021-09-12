@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     ** Opening shared memory and semaphores
     */
     int shmFd;
-    void * shMemory;
+    char * shMemory;
     int shmSize = taskCount * BUFFER_SIZE;
 
     if (setvbuf(stdout, NULL, _IONBF, 0) != 0) {
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error setting size to shared memory (app)");
     }
 
-    shMemory = mmap(NULL, shmSize, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0); // todo prot
+    shMemory = (char *) mmap(NULL, shmSize, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0); // todo prot
     if (shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (app)");
     }
