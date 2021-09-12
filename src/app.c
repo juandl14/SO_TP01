@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error setting size to shared memory (app)");
     }
 
-    shMemory = mmap(0,shmSize,PROT_READ | PROT_WRITE,MAP_SHARED,shmFd,0); // todo prot
+    shMemory = mmap(NULL, shmSize,/* PROT_READ | */PROT_WRITE, MAP_SHARED, shmFd, 0); // todo prot
     if (shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (app)");
     }
@@ -65,6 +65,11 @@ int main(int argc, char *argv[]) {
 
     char buffer[BUFFER_SIZE] = {0};
 
+    // TEST
+    FILE *test = fopen("test.txt", "w");
+    fprintf(test, "antes del while");
+
+
     while(tasksFinished < taskCount) {
         fd_set readFdSet;
         FD_ZERO(&readFdSet);
@@ -84,6 +89,9 @@ int main(int argc, char *argv[]) {
         }
         //
 
+        // TEST
+        fprintf(test, "Salio del for, el max es %d\n", max);
+
         int ready;
         if((ready = select(max + 1, &readFdSet, NULL, NULL, NULL)) == ERROR_CODE) {
             errorHandler("Error in select (app)");
@@ -93,20 +101,18 @@ int main(int argc, char *argv[]) {
             int fd = slavesArray[i].in;
             if(FD_ISSET(fd, &readFdSet)) {
                 // printf("entro");
-                int dimRead = read(fd, buffer, BUFFER_SIZE);
-                if (dimRead == ERROR_CODE) {
+                // int dimRead = read(fd, buffer, BUFFER_SIZE);
+                // if (dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
-                } else if (dimRead <= 0) {
+                // } else if (dimRead <= 0) {
                     slavesArray[i].working = 0;
-                    // continue;
-                    // tasksFinished++;
-                } else {
+                // } else {
                     tasksFinished++;
                     ready--;
                     int move = fprintf(shMemory, "%s\n", buffer);
                     shMemory += (move + 1) * sizeof(*shMemory);
                     postSemaphore(sem);
-                }
+                // }
 
             }
 

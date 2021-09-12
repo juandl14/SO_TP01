@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     }
 
     // TODO prot
-    if((shMemory = (char *) mmap(0,shmSize,PROT_READ,MAP_SHARED,shmFd,0)) == MAP_FAILED) {
+    if((shMemory = (char *) mmap(NULL, shmSize, PROT_READ, MAP_SHARED, shmFd, 0)) == MAP_FAILED) {
         errorHandler("Error mapping shared memory (view)");
     }
 
