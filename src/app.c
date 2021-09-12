@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error setting buffer in main (app)");
     }
 
-    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
+    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0777)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (app)");
     }
 
@@ -36,20 +36,20 @@ int main(int argc, char *argv[]) {
         errorHandler("Error setting size to shared memory (app)");
     }
 
-    shMemory = mmap(NULL, shmSize,/* PROT_READ | */PROT_WRITE, MAP_SHARED, shmFd, 0); // todo prot
+    shMemory = mmap(NULL, shmSize, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0); // todo prot
     if (shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (app)");
     }
+    
+    //unlinkSemaphore();
 
-    // unlinkSemaphore();
-    sem_t *sem; //TODO see permissions and flags
+    sem_t *sem;
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    sleep(2);
     write(STDOUT, &shmSize, sizeof(int));
-
+    sleep(2);
 
     /*
     ** Handling slaves and files
