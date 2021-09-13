@@ -64,11 +64,11 @@ void handleData(sem_t * sem,char * shMemory) {
     while(aux) {
         
         waitSemaphore(sem);
-        printf("Entre\n");
+
         if(*shMemory == 0) {
             aux = 0;
         } else {
-            int move = printf("%s",shMemory);
+            printf("%s",shMemory);
             shMemory += JUMP;
         }
     }
