@@ -28,7 +28,7 @@ void solver(const char *fileName) {
     }
 
     char input[BUFFER_SIZE/2]={0};
-    fread(input,sizeof(char),BUFFER_SIZE,fd);
+    fread(input,sizeof(char),BUFFER_SIZE-1,fd);
 
     char output[BUFFER_SIZE];
     sprintf(output,"PID: %d\nFile: %s\n%s\n",getpid(),fileName,input);
