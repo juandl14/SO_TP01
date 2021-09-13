@@ -1,6 +1,7 @@
 #include "app.h"
 
 int main(int argc, char *argv[]) {
+    sem_unlink(SEM_NAME);
 
     if (argc < 2) {
         errorHandler("Error: incorrect amount of arguments (app)");
@@ -43,8 +44,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error mapping shared memory (app)");
     }
 
-    unlinkSemaphore();
-    sem_t *sem; //TODO see permissions and flags
+    sem_t *sem;
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }

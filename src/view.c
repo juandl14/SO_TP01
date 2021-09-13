@@ -1,7 +1,7 @@
 #include "view.h"
 
 int main(int argc, char *argv[]) {
-
+    sem_unlink(SEM_NAME);
     if (setvbuf(stdin, NULL, _IONBF, 0) != 0) {
         errorHandler("Error performing setvbuf in main (view)");
     }
