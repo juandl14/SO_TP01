@@ -28,11 +28,12 @@ int main(int argc, char *argv[]) {
     char * shMemory;
     sem_t * sem;
 
-    if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
+    unlinkSemaphore();
+    if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (view)");
     }
 
-    if((shmFd = shm_open(SHM_NAME,O_RDWR,0777)) == ERROR_CODE) {
+    if((shmFd = shm_open(SHM_NAME, O_RDWR, 0666)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (view)");
     }
 

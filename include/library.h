@@ -27,7 +27,7 @@
 #define STDOUT 1
 #define READ_FD 0
 #define WRITE_FD 1
-
+#define JUMP 1024
 #define BUFFER_SIZE 1024
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

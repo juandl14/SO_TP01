@@ -13,37 +13,36 @@ int main(int argc, char *argv[]) {
     int slaveAmount =  MIN(SLAVE_AMOUNT,taskCount);
     int filesPerSlave = (taskCount/SLAVE_AMOUNT >= 2)? 2 : 1;
 
-    printf("%d - %d - %d\n", taskCount, slaveAmount, filesPerSlave);
-
-    // FILE *resultFile;
-
     Tslave slavesArray[slaveAmount];
 
     /*
     ** Opening shared memory and semaphores
     */
-    int shmFd;
-    void * shMemory;
+    void *shMemory;
+    void *shMemCopy;
     int shmSize = taskCount * BUFFER_SIZE;
 
     if (setvbuf(stdout, NULL, _IONBF, 0) != 0) {
         errorHandler("Error setting buffer in main (app)");
     }
 
-    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
+    int shmFd;
+    if ((shmFd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (app)");
     }
 
-    if (ftruncate(shmFd,shmSize) == ERROR_CODE) {
+    if (ftruncate(shmFd, shmSize) == ERROR_CODE) {
         errorHandler("Error setting size to shared memory (app)");
     }
 
-    shMemory = mmap(NULL, shmSize, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, shmFd, 0); // todo prot
+    shMemory = mmap(NULL, shmSize, PROT_WRITE, MAP_SHARED, shmFd, 0);
     if (shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (app)");
     }
+    shMemCopy = shMemory;
 
-    unlinkSemaphore();
+    // unlinkSemaphore();
+    sem_unlink(SEM_NAME);
     sem_t *sem; //TODO see permissions and flags
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
@@ -58,7 +57,7 @@ int main(int argc, char *argv[]) {
     */
     createChildren(slavesArray, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
-    // Send first files to the slaves
+    /* Send first files to the slaves */
     int tasksInProgress = 0;
     int tasksFinished = 0;
 
@@ -66,11 +65,6 @@ int main(int argc, char *argv[]) {
     sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksInProgress, &tasksFinished);
 
     char buffer[BUFFER_SIZE] = {0};
-
-    // TEST
-    // FILE *test = fopen("test.txt", "w");
-    // fprintf(test, "antes del while");
-
 
     while(tasksFinished < taskCount) {
         fd_set readFdSet;
@@ -98,7 +92,6 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < slaveAmount && ready > 0; i++) {
             int fd = slavesArray[i].in;
             if(FD_ISSET(fd, &readFdSet)) {
-                // printf("entro");
                 int dimRead = read(fd, buffer, BUFFER_SIZE);
                 if (dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
@@ -106,12 +99,13 @@ int main(int argc, char *argv[]) {
                     slavesArray[i].working = 0;
                 } else {
                     tasksFinished++;
-                    ready--;
-                    int move = fprintf(shMemory, "%s\n", buffer);
-                    shMemory += (move + 1) * sizeof(*shMemory);
-                    postSemaphore(sem);
+                    if (sprintf((char*)(shMemory), "%s\n", buffer) == ERROR_CODE) {
+                        errorHandler("Error performing sprintf in function main (app)");
+                    }
+                    shMemory += JUMP;
+                    // postSemaphore(sem);
                 }
-
+                ready--;
             }
 
         }
