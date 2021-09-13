@@ -12,6 +12,7 @@ typedef struct slave {
     int in;
     int out;
     int working;
+    int fileCount;
 } Tslave;
 
 void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *const argv[]);

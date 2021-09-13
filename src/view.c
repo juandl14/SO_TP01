@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 }
 
 void handleData(sem_t * sem,char * shMemory) {
-    int aux = 1;
+    int aux = 1; int var = 1;
     while(aux) {
 
         waitSemaphore(sem);
@@ -75,7 +75,8 @@ void handleData(sem_t * sem,char * shMemory) {
         if(*shMemory == 0) {
             aux = 0;
         } else {
-            printf("%s",shMemory);
+            printf("%d %s",  var, shMemory);
+            var++;
             shMemory += JUMP;
         }
     }

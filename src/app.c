@@ -64,11 +64,11 @@ int main(int argc, char *argv[]) {
     createChildren(slavesArray, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
 
     /* Send first files to the slaves */
-    int tasksInProgress = 0;
+    int tasksSent = 0;
     int tasksFinished = 0;
 
     int initialPaths = filesPerSlave * slaveAmount;
-    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksInProgress, &tasksFinished);
+    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksSent, &tasksFinished);
 
     char buffer[BUFFER_SIZE] = {0};
 
@@ -102,31 +102,35 @@ int main(int argc, char *argv[]) {
                 if (dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
                 } else if (dimRead <= 0) {
-                    slavesArray[i].working--;
+                    slavesArray[i].working = 0;
                 } else {
                     tasksFinished++;
+                    slavesArray[i].fileCount--;
+                    buffer[dimRead + 1] = '\0';
                     if (sprintf((char*)(shMemory), "%s\n", buffer) == ERROR_CODE) {
                         errorHandler("Error performing sprintf in function main (app)");
                     }
                     shMemory += JUMP;
                     postSemaphore(sem);
+                }
 
-                    //send new files to slaves
-                    if(slavesArray[i].working == 0 && tasksInProgress < taskCount) {
-                        char fileToSlave[BUFFER_SIZE] = {0};
-                        strcat(fileToSlave, argv[tasksInProgress + 1]);
-                        strcat(fileToSlave, "\n\0");
-                        if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave))) {
-                            errorHandler("Error sending files to slaves (app)");
-                        }
-                        tasksInProgress++;
-                        slavesArray[i].working++;
-                    } else {
+                //send new files to slaves
+                if(!slavesArray[i].working && tasksSent < taskCount) {
+                    char fileToSlave[BUFFER_SIZE] = {0};
+                    strcat(fileToSlave, argv[tasksSent + 1]);
+                    strcat(fileToSlave, "\n\0");
+                    if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave))) {
+                        errorHandler("Error sending files to slaves (app)");
+                    }
+                    tasksSent++;
+                    slavesArray[i].fileCount++;
+                    slavesArray[i].working = 1;
+                } //else {
                         // if(close(slavesArray[i].out) == ERROR_CODE) {
                         //     errorHandler("Error closing fd (app)");
                         // }
-                    }
-                }
+                    //}
+                //}
                 ready--;
             }
 
@@ -207,7 +211,8 @@ void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *con
                 slavesArray[i].pid = pid;
                 slavesArray[i].in = fdData[READ_FD];
                 slavesArray[i].out = fdPath[WRITE_FD];
-                slavesArray[i].working = 1;
+                slavesArray[i].working = 0;
+                slavesArray[i].fileCount = 0;
 
                 // -------------TEST---------------------
                 // printf("Soy el padre. Mi PID es %d y el de mi hijo, %d\n", getpid(), pid);
@@ -236,7 +241,7 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
     }
 }
 
-void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress, int *tasksFinished) {
+void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksSent, int *tasksFinished) {
 
     for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
         char fileSent[BUFFER_SIZE] = {0};
@@ -250,8 +255,9 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
         //     errorHandler("Error writing in fdPath (app)");
         // }
 
-        (*tasksInProgress)++;
-        slavesArray[currentTask % slaveAmount].working++;
+        (*tasksSent)++;
+        slavesArray[currentTask % slaveAmount].working = 1;
+        slavesArray[currentTask % slaveAmount].fileCount++;
         //
     }
 
