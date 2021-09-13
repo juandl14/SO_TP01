@@ -21,8 +21,8 @@
 #define ERROR_MSG 100
 
 #define INIT_VAL_SEM 0
-#define SEM_NAME "semaphore"
-#define SHM_NAME "shMemory"
+#define SEM_NAME "/semaphore"
+#define SHM_NAME "/shMemory"
 #define STDIN 0
 #define STDOUT 1
 #define READ_FD 0
