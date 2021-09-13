@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error mapping shared memory (app)");
     }
     
-    //unlinkSemaphore();
+    unlinkSemaphore();
 
     sem_t *sem;
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
                 // } else {
                     tasksFinished++;
                     ready--;
-                    int move = fprintf(shMemory, "%s\n", buffer);
+                    int move = sprintf(shMemory, "%s\n", buffer);
                     shMemory += (move + 1) * sizeof(*shMemory);
                     postSemaphore(sem);
                 // }
