@@ -12,14 +12,18 @@ int main(int argc, char *argv[]) {
     // printf("%d\n", argc);
 
     if (argc == 1) {
-        if(read(STDIN, &shmSize, sizeof(int)) == ERROR_CODE) {
+        char buff[MEMORY_LONG] = {0};
+        if(read(STDIN, buff, MEMORY_LONG) == ERROR_CODE) {
             errorHandler("Error reading data for initializing shared memory (view)");
         }
+        shmSize = atoi(buff);
     } else if (argc == 2) {
         shmSize = atoi(argv[1]);
     } else {
         errorHandler("Error: invalid amount of arguments (view)");
     }
+
+    // printf("%d\n", shmSize);
 
     if(shmSize <= 0) {
         errorHandler("Error defining size of shared memory (view)");
@@ -36,21 +40,20 @@ int main(int argc, char *argv[]) {
     }
 
     if((shmFd = shm_open(SHM_NAME, O_RDWR, 0666)) == ERROR_CODE) { */
-    if((shmFd = shm_open(SHM_NAME,O_RDWR,0777)) == ERROR_CODE) {
+    if((shmFd = shm_open(SHM_NAME, O_RDWR, 0666)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (view)");
     }
 
-    if((shMemory = (char *) mmap(NULL, shmSize, PROT_READ, MAP_SHARED, shmFd, 0)) == MAP_FAILED) {
+    if((shMemory = mmap(NULL, shmSize, PROT_READ, MAP_SHARED, shmFd, 0)) == MAP_FAILED) {
         errorHandler("Error mapping shared memory (view)");
     }
 
     if ((sem = sem_open(SEM_NAME, O_CREAT, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
-
         errorHandler("Error opening semaphore (view)");
     }
 
     // Showing results
-    handleData(sem,shMemory);
+    handleData(sem,(char*)(shMemory));
 
 
     // Closing shared memory and semaphores

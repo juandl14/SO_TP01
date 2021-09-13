@@ -52,7 +52,9 @@ int main(int argc, char *argv[]) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    printf("%s %d %d\n", SHM_NAME, (int)shmSize, argc - 1);
+    // close(shmFd);
+
+    printf("%d\n",(int)shmSize);
     sleep(2);
 
 
