@@ -1,7 +1,7 @@
 #include "view.h"
 
 int main(int argc, char *argv[]) {
-    sem_unlink(SEM_NAME);
+
     if (setvbuf(stdin, NULL, _IONBF, 0) != 0) {
         errorHandler("Error performing setvbuf in main (view)");
     }
@@ -28,17 +28,17 @@ int main(int argc, char *argv[]) {
     char * shMemory;
     sem_t * sem;
 
-    if ((sem = sem_open(SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        errorHandler("Error opening semaphore (view)");
-    }
-
     if((shmFd = shm_open(SHM_NAME,O_RDWR,0777)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (view)");
     }
 
-    // TODO prot
     if((shMemory = (char *) mmap(NULL, shmSize, PROT_READ, MAP_SHARED, shmFd, 0)) == MAP_FAILED) {
         errorHandler("Error mapping shared memory (view)");
+    }
+
+    if ((sem = sem_open(SEM_NAME, O_CREAT, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
+
+        errorHandler("Error opening semaphore (view)");
     }
 
 

@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error setting buffer in main (app)");
     }
 
-    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
+    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0777)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (app)");
     }
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     }
 
     sem_t *sem;
-    if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
+    if ((sem = sem_open(SEM_NAME, O_CREAT, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }
 
