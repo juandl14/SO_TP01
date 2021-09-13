@@ -21,8 +21,8 @@
 #define ERROR_MSG 100
 
 #define INIT_VAL_SEM 0
-#define SEM_NAME "/semaphore"
-#define SHM_NAME "/shMemory"
+#define SEM_NAME "semaphore"
+#define SHM_NAME "shMemory"
 #define STDIN 0
 #define STDOUT 1
 #define READ_FD 0
@@ -31,6 +31,7 @@
 #define BUFFER_SIZE 1024
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) > (b) ? (b) : (a))
 
 void errorHandler(const char *);
 void postSemaphore(sem_t *);

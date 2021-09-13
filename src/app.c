@@ -10,8 +10,10 @@ int main(int argc, char *argv[]) {
     ** as many children as arguments, since I do not want more children than arguments
     */
     int taskCount = argc - 1;
-    int slaveAmount =  MAX(SLAVE_AMOUNT,taskCount);
+    int slaveAmount =  MIN(SLAVE_AMOUNT,taskCount);
     int filesPerSlave = (taskCount/SLAVE_AMOUNT >= 2)? 2 : 1;
+
+    printf("%d - %d - %d\n", taskCount, slaveAmount, filesPerSlave);
 
     // FILE *resultFile;
 
@@ -21,14 +23,14 @@ int main(int argc, char *argv[]) {
     ** Opening shared memory and semaphores
     */
     int shmFd;
-    char * shMemory;
+    void * shMemory;
     int shmSize = taskCount * BUFFER_SIZE;
 
     if (setvbuf(stdout, NULL, _IONBF, 0) != 0) {
         errorHandler("Error setting buffer in main (app)");
     }
 
-    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0777)) == ERROR_CODE) {
+    if ((shmFd = shm_open(SHM_NAME,O_CREAT | O_RDWR,0)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (app)");
     }
 
@@ -36,20 +38,20 @@ int main(int argc, char *argv[]) {
         errorHandler("Error setting size to shared memory (app)");
     }
 
-    shMemory = (char *) mmap(NULL, shmSize, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0); // todo prot
+    shMemory = mmap(NULL, shmSize, PROT_READ/* | PROT_WRITE*/, MAP_SHARED, shmFd, 0); // todo prot
     if (shMemory == MAP_FAILED) {
         errorHandler("Error mapping shared memory (app)");
     }
-    
-    unlinkSemaphore();
 
-    sem_t *sem;
+    unlinkSemaphore();
+    sem_t *sem; //TODO see permissions and flags
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    write(STDOUT, &shmSize, sizeof(int));
     sleep(2);
+    write(STDOUT, &shmSize, sizeof(int));
+
 
     /*
     ** Handling slaves and files
@@ -66,8 +68,8 @@ int main(int argc, char *argv[]) {
     char buffer[BUFFER_SIZE] = {0};
 
     // TEST
-    FILE *test = fopen("test.txt", "w");
-    fprintf(test, "antes del while");
+    // FILE *test = fopen("test.txt", "w");
+    // fprintf(test, "antes del while");
 
 
     while(tasksFinished < taskCount) {
@@ -87,10 +89,6 @@ int main(int argc, char *argv[]) {
                 FD_SET(currentFd, &readFdSet);
             }
         }
-        //
-
-        // TEST
-        fprintf(test, "Salio del for, el max es %d\n", max);
 
         int ready;
         if((ready = select(max + 1, &readFdSet, NULL, NULL, NULL)) == ERROR_CODE) {
@@ -101,18 +99,18 @@ int main(int argc, char *argv[]) {
             int fd = slavesArray[i].in;
             if(FD_ISSET(fd, &readFdSet)) {
                 // printf("entro");
-                // int dimRead = read(fd, buffer, BUFFER_SIZE);
-                // if (dimRead == ERROR_CODE) {
+                int dimRead = read(fd, buffer, BUFFER_SIZE);
+                if (dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
-                // } else if (dimRead <= 0) {
+                } else if (dimRead <= 0) {
                     slavesArray[i].working = 0;
-                // } else {
+                } else {
                     tasksFinished++;
                     ready--;
-                    int move = sprintf(shMemory, "%s\n", buffer);
+                    int move = fprintf(shMemory, "%s\n", buffer);
                     shMemory += (move + 1) * sizeof(*shMemory);
                     postSemaphore(sem);
-                // }
+                }
 
             }
 
@@ -170,7 +168,7 @@ void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *con
                 close(fdData[READ_FD]);
                 // close(READ_FD);
                 // close(WRITE_FD);
-                printf("%d %d\n",fdPath[READ_FD],fdData[WRITE_FD]);
+                // printf("%d %d\n",fdPath[READ_FD],fdData[WRITE_FD]);
                 if (dup2(fdPath[READ_FD], 0) == ERROR_CODE || dup2(fdData[WRITE_FD], 1) == ERROR_CODE) {
                     errorHandler("Error performing dup2 in function createChildren (app)");
                 }
@@ -193,7 +191,7 @@ void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *con
                 slavesArray[i].pid = pid;
                 slavesArray[i].in = fdData[READ_FD];
                 slavesArray[i].out = fdPath[WRITE_FD];
-                slavesArray[i].working = 0;
+                slavesArray[i].working = 1;
 
                 // -------------TEST---------------------
                 // printf("Soy el padre. Mi PID es %d y el de mi hijo, %d\n", getpid(), pid);
@@ -223,15 +221,18 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
 }
 
 void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress, int *tasksFinished) {
+    char fileSent[BUFFER_SIZE];
 
     for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
-        if(write(slavesArray[currentTask % slaveAmount].out, fileName[i], strlen(fileName[i])) == -1) {
+        strcat(fileSent, fileName[i]);
+        strcat(fileSent, "\n");
+        if(write(slavesArray[currentTask % slaveAmount].out, fileSent, strlen(fileSent)) == ERROR_CODE) {
             errorHandler("Error writing in fdPath (app)");
         }
 
-        if(write(slavesArray[currentTask % slaveAmount].out, "/n", 1) == -1) {
-            errorHandler("Error writing in fdPath (app)");
-        }
+        // if(write(slavesArray[currentTask % slaveAmount].out, "\n", 1) == ERROR_CODE) {
+        //     errorHandler("Error writing in fdPath (app)");
+        // }
 
         (*tasksInProgress)++;
         slavesArray[currentTask % slaveAmount].working++;
