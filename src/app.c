@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     */
     void *shMemory;
     void *shMemCopy;
-    int shmSize = taskCount * BUFFER_SIZE;
+    off_t shmSize = taskCount * BUFFER_SIZE;
 
 
     if (setvbuf(stdout, NULL, _IONBF, BUFFER_SIZE) != 0) {
@@ -52,9 +52,9 @@ int main(int argc, char *argv[]) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    write(STDOUT, &shmSize, sizeof(int));
+    printf("%s %d %d\n", SHM_NAME, (int)shmSize, argc - 1);
     sleep(2);
-    
+
 
     /*
     ** Handling slaves and files
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
     unlinkSemaphore();
 
     close(shmFd);
-    unmapSharedMemory(shMemory,shmSize);
+    unmapSharedMemory(shMemCopy,shmSize);
     unlinkSharedMemory();
 }
 

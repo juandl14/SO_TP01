@@ -1,13 +1,15 @@
 #include "view.h"
 
 int main(int argc, char *argv[]) {
-/*
+
     if (setvbuf(stdin, NULL, _IONBF, BUFFER_SIZE) != 0) {
         errorHandler("Error performing setvbuf in main (view)");
     }
-*/
+
     // Reciving data to initialize
     int shmSize;
+
+    // printf("%d\n", argc);
 
     if (argc == 1) {
         if(read(STDIN, &shmSize, sizeof(int)) == ERROR_CODE) {
@@ -25,7 +27,7 @@ int main(int argc, char *argv[]) {
 
     // Opening shared memory and semaphores
     int shmFd;
-    char * shMemory;
+    void * shMemory;
     sem_t * sem;
 
     /*  unlinkSemaphore();
