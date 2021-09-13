@@ -114,12 +114,15 @@ int main(int argc, char *argv[]) {
                         char fileToSlave[BUFFER_SIZE] = {0};
                         strcat(fileToSlave, argv[tasksInProgress + 1]);
                         strcat(fileToSlave, "\n");
-                        if(write(WRITE_FD, fileToSlave, strlen(fileToSlave))) {
+                        if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave))) {
                             errorHandler("Error sending files to slaves (app)");
                         }
                         tasksInProgress++;
                         slavesArray[i].working++;
-
+                    } else {
+                        if(close(slavesArray[i].out) == ERROR_CODE) {
+                            errorHandler("Error closing fd (app)")
+                        }
                     }
                 }
                 ready--;

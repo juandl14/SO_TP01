@@ -59,12 +59,14 @@ int main(int argc, char *argv[]) {
 
     unmapSharedMemory(shMemory,shmSize);
     unlinkSharedMemory();
+
+    return 0;
 }
 
 void handleData(sem_t * sem,char * shMemory) {
     int aux = 1;
     while(aux) {
-        
+
         waitSemaphore(sem);
 
         if(*shMemory == 0) {
