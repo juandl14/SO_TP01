@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
                 if (dimRead == ERROR_CODE) {
                     errorHandler("Error reading from fdData (app)");
                 } else if (dimRead <= 0) {
-                    slavesArray[i].working = 0;
+                    slavesArray[i].working--;
                 } else {
                     tasksFinished++;
                     if (sprintf((char*)(shMemory), "%s\n", buffer) == ERROR_CODE) {
@@ -108,6 +108,19 @@ int main(int argc, char *argv[]) {
                     }
                     shMemory += JUMP;
                     postSemaphore(sem);
+
+                    //send new files to slaves
+                    if(slavesArray[i].working == 0 && tasksInProgress < taskCount) {
+                        char fileToSlave[BUFFER_SIZE] = {0};
+                        strcat(fileToSlave, argv[tasksInProgress + 1]);
+                        strcat(fileToSlave, "\n");
+                        if(write(WRITE_FD, fileToSlave, strlen(fileToSlave))) {
+                            errorHandler("Error sending files to slaves (app)");
+                        }
+                        tasksInProgress++;
+                        slavesArray[i].working++;
+
+                    }
                 }
                 ready--;
             }
