@@ -122,9 +122,9 @@ int main(int argc, char *argv[]) {
                         tasksInProgress++;
                         slavesArray[i].working++;
                     } else {
-                        if(close(slavesArray[i].out) == ERROR_CODE) {
-                            errorHandler("Error closing fd (app)");
-                        }
+                        // if(close(slavesArray[i].out) == ERROR_CODE) {
+                        //     errorHandler("Error closing fd (app)");
+                        // }
                     }
                 }
                 ready--;
@@ -230,7 +230,7 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
         }
 
         if(close(slavesArray[i].out) == ERROR_CODE) {
-            errorHandler("Error closing write end of fdData (app)");
+            errorHandler("Error closing write end of fdPath (app)");
         }
 
     }
