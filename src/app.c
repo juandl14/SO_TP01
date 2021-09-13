@@ -1,6 +1,7 @@
 #include "app.h"
 
 int main(int argc, char *argv[]) {
+    sem_unlink(SEM_NAME);
 
     if (argc < 2) {
         errorHandler("Error: incorrect amount of arguments (app)");
@@ -22,7 +23,8 @@ int main(int argc, char *argv[]) {
     void *shMemCopy;
     int shmSize = taskCount * BUFFER_SIZE;
 
-    if (setvbuf(stdout, NULL, _IONBF, 0) != 0) {
+
+    if (setvbuf(stdout, NULL, _IONBF, BUFFER_SIZE) != 0) {
         errorHandler("Error setting buffer in main (app)");
     }
 
@@ -45,12 +47,14 @@ int main(int argc, char *argv[]) {
     sem_unlink(SEM_NAME);
     sem_t *sem; //TODO see permissions and flags
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
+    // sem_t *sem; // try this if the one above doesn't work
+    // if ((sem = sem_open(SEM_NAME, O_CREAT | O_RDWR, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    sleep(2);
     write(STDOUT, &shmSize, sizeof(int));
-
+    sleep(2);
+    
 
     /*
     ** Handling slaves and files
