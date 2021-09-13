@@ -1,11 +1,11 @@
 #include "view.h"
 
 int main(int argc, char *argv[]) {
-
-    if (setvbuf(stdin, NULL, _IONBF, 0) != 0) {
+/*
+    if (setvbuf(stdin, NULL, _IONBF, BUFFER_SIZE) != 0) {
         errorHandler("Error performing setvbuf in main (view)");
     }
-
+*/
     // Reciving data to initialize
     int shmSize;
 
@@ -41,7 +41,6 @@ int main(int argc, char *argv[]) {
         errorHandler("Error opening semaphore (view)");
     }
 
-
     // Showing results
     handleData(sem,shMemory);
 
@@ -56,6 +55,7 @@ int main(int argc, char *argv[]) {
 
 void handleData(sem_t * sem,char * shMemory) {
     while(1) {
+
         waitSemaphore(sem);
         if(*shMemory == 0) {
             break;

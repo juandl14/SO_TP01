@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
     void * shMemory;
     int shmSize = taskCount * BUFFER_SIZE;
 
-    if (setvbuf(stdout, NULL, _IONBF, 0) != 0) {
+
+    if (setvbuf(stdout, NULL, _IONBF, BUFFER_SIZE) != 0) {
         errorHandler("Error setting buffer in main (app)");
     }
 
@@ -45,13 +46,13 @@ int main(int argc, char *argv[]) {
     }
 
     sem_t *sem;
-    if ((sem = sem_open(SEM_NAME, O_CREAT, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
+    if ((sem = sem_open(SEM_NAME, O_CREAT | O_RDWR, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    sleep(2);
     write(STDOUT, &shmSize, sizeof(int));
-
+    sleep(2);
+    
 
     /*
     ** Handling slaves and files
