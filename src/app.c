@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     */
     int taskCount = argc - 1;
     int slaveAmount =  MIN(SLAVE_AMOUNT,taskCount);
-    int filesPerSlave = (taskCount/SLAVE_AMOUNT >= 2)? 2 : 1;
+    int filesPerSlave = (taskCount > SLAVE_AMOUNT * 2)? 2 : 1;
 
     Tslave slavesArray[slaveAmount];
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
                     if(slavesArray[i].working == 0 && tasksInProgress < taskCount) {
                         char fileToSlave[BUFFER_SIZE] = {0};
                         strcat(fileToSlave, argv[tasksInProgress + 1]);
-                        strcat(fileToSlave, "\n");
+                        strcat(fileToSlave, "\n\0");
                         if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave))) {
                             errorHandler("Error sending files to slaves (app)");
                         }
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
                         slavesArray[i].working++;
                     } else {
                         if(close(slavesArray[i].out) == ERROR_CODE) {
-                            errorHandler("Error closing fd (app)")
+                            errorHandler("Error closing fd (app)");
                         }
                     }
                 }
@@ -235,9 +235,9 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
 }
 
 void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress, int *tasksFinished) {
-    char fileSent[BUFFER_SIZE];
 
     for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
+        char fileSent[BUFFER_SIZE] = {0};
         strcat(fileSent, fileName[i]);
         strcat(fileSent, "\n");
         if(write(slavesArray[currentTask % slaveAmount].out, fileSent, strlen(fileSent)) == ERROR_CODE) {
