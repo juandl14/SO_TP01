@@ -60,13 +60,16 @@ int main(int argc, char *argv[]) {
 }
 
 void handleData(sem_t * sem,char * shMemory) {
-    while(1) {
-
+    int aux = 1;
+    while(aux) {
+        
         waitSemaphore(sem);
+        printf("Entre\n");
         if(*shMemory == 0) {
-            break;
+            aux = 0;
+        } else {
+            int move = printf("%s",shMemory);
+            shMemory += JUMP;
         }
-        int move = printf("%s",shMemory);
-        shMemory += (move + 1) * sizeof(*shMemory);
     }
 }

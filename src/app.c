@@ -43,9 +43,9 @@ int main(int argc, char *argv[]) {
     }
     shMemCopy = shMemory;
 
-    // unlinkSemaphore();
     sem_unlink(SEM_NAME);
-    sem_t *sem; //TODO see permissions and flags
+
+    sem_t *sem;
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
     // sem_t *sem; // try this if the one above doesn't work
     // if ((sem = sem_open(SEM_NAME, O_CREAT | O_RDWR, 0600, INIT_VAL_SEM)) == SEM_FAILED) {
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
                         errorHandler("Error performing sprintf in function main (app)");
                     }
                     shMemory += JUMP;
-                    // postSemaphore(sem);
+                    postSemaphore(sem);
                 }
                 ready--;
             }

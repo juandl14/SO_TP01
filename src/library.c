@@ -33,8 +33,8 @@ void unlinkSemaphore() {
     }
 }
 
-void unmapSharedMemory(char * memory, int size) {
-    if(munmap(memory,size) == ERROR_CODE) {
+void unmapSharedMemory(void * memory, int size) {
+    if(munmap( memory,size) == ERROR_CODE) {
         errorHandler("Error unmapping shared memory");
     }
 }
