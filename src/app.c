@@ -132,6 +132,10 @@ int main(int argc, char *argv[]) {
         errorHandler("Error closing result file in main (app)");
     }
 
+    if (fclose(res) != 0) {
+        errorHandler("Error closing result file in main (app)");
+    }
+
     endChildren(slavesArray, slaveAmount);
 
     /*
