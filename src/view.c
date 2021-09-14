@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Reciving data to initialize
-    int shmSize, taskCount;
+    int shmSize/*, taskCount*/;
 
     // printf("%d\n", argc);
 
@@ -25,13 +25,13 @@ int main(int argc, char *argv[]) {
         }
         shmSize = atoi(tok);
         tok = strtok(NULL, " ");
-        if (tok == NULL) {
-            errorHandler("Error in strtok 2 (view)");
-        }
-        taskCount = atoi(tok);
+        // if (tok == NULL) {
+        //     errorHandler("Error in strtok 2 (view)");
+        // }
+        // taskCount = atoi(tok);
     } else if (argc == 2) {
         shmSize = atoi(argv[1]);
-        taskCount = atoi(argv[2]);
+        // taskCount = atoi(argv[2]);
     } else {
         errorHandler("Error: invalid amount of arguments (view)");
     }
