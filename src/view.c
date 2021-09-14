@@ -1,7 +1,7 @@
 #include "view.h"
 
 int main(int argc, char *argv[]) {
-    
+
     setBuffer(stdin,BUFFER_SIZE);
 
     int shmSize;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // Opening shared memory and semaphores
+    /* Opening shared memory and semaphores */
     int shmFd;
     void * shMemory;
     sem_t * sem;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
 
 void handleData(sem_t * sem,char * shMemory, int size) {
-    int i = 0; 
+    int i = 0;
     int fileNumber = 1;
 
     while(i < size) {
@@ -68,7 +68,7 @@ void handleData(sem_t * sem,char * shMemory, int size) {
 }
 
 void closingView(sem_t * sem, int shmFd,int shmSize, void * shMemory) {
-    
+
     closeSemaphore(sem);
     close(shmFd);
 

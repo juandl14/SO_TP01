@@ -4,8 +4,6 @@ int main(int argc, char *argv[]) {
 
     /* ** ** Openers - buffer, shared memory, semaphores ** ** */
 
-    sem_unlink(SEM_NAME);
-
     if (argc < 2) {
         errorHandler("Error: incorrect amount of arguments (app)");
     }
@@ -51,7 +49,7 @@ int main(int argc, char *argv[]) {
         errorHandler("Error opening semaphore (app)");
     }
 
-    printf("%d\n", argc - 1); 
+    printf("%d\n", argc - 1);
     sleep(2);
 
 
@@ -109,7 +107,7 @@ int main(int argc, char *argv[]) {
                     postSemaphore(sem);
                 }
 
-                //send new files to slaves
+                /* send new files to slaves */
                 if(slavesArray[i].fileCount == 0 && tasksSent < taskCount) {
                     char fileToSlave[BUFFER_SIZE] = {0};
                     strcat(fileToSlave, argv[tasksSent + 1]);
@@ -126,10 +124,6 @@ int main(int argc, char *argv[]) {
 
         }
 
-    }
-
-    if (fclose(res) != 0) {
-        errorHandler("Error closing result file in main (app)");
     }
 
     if (fclose(res) != 0) {
