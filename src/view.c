@@ -7,48 +7,32 @@ int main(int argc, char *argv[]) {
     }
 
     // Reciving data to initialize
-    int shmSize, taskCount;
-
-    // printf("%d\n", argc);
+    int shmSize;
 
     if (argc == 1) {
         char buff[MEMORY_LONG] = {0};
-        int len;
-        if((len = read(STDIN, buff, MEMORY_LONG)) == ERROR_CODE) {
+        if(read(STDIN, buff, MEMORY_LONG) == ERROR_CODE) {
             errorHandler("Error reading data for initializing shared memory (view)");
         }
         shmSize = atoi(buff);
-        // char *dest = malloc(len * sizeof(char));
-        // strncpy(dest, buff, len);
-        // char *tok = strtok(dest, " ");
-        // shmSize = atoi(tok);
-        // *tok = strtok(NULL, " ");
-        // taskCount = atoi(tok);
-        // free(dest);
     } else if (argc == 2) {
         shmSize = atoi(argv[1]);
-        taskCount = atoi(argv[2]);
     } else {
         errorHandler("Error: invalid amount of arguments (view)");
     }
+
     shmSize *= BUFFER_SIZE;
-    // printf("%d\n", shmSize);
 
     if(shmSize <= 0) {
         errorHandler("Error defining size of shared memory (view)");
     }
+
 
     // Opening shared memory and semaphores
     int shmFd;
     void * shMemory;
     sem_t * sem;
 
-    /*  unlinkSemaphore();
-    if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
-        errorHandler("Error opening semaphore (view)");
-    }
-
-    if((shmFd = shm_open(SHM_NAME, O_RDWR, 0666)) == ERROR_CODE) { */
     if((shmFd = shm_open(SHM_NAME, O_RDWR, 0666)) == ERROR_CODE) {
         errorHandler("Error opening shared memory (view)");
     }
@@ -62,6 +46,7 @@ int main(int argc, char *argv[]) {
     }
     void *shmPtr = shMemory;
 
+
     // Showing results
     handleData(sem,(char*)(shMemory), shmSize);
 
@@ -71,36 +56,21 @@ int main(int argc, char *argv[]) {
     close(shmFd);
 
     unmapSharedMemory(shmPtr,shmSize);
-    // unlinkSharedMemory();
 
     return 0;
 }
 
-// void handleData(sem_t * sem,char * shMemory) {
-//     int aux = 1; int var = 1;
-//     while(aux) {
-//
-//         waitSemaphore(sem);
-//
-//         if(*shMemory == 0) {
-//             aux = 0;
-//         } else {
-//             printf("%d %s", var,shMemory);
-//             var++;
-//             shMemory += JUMP;
-//         }
-//     }
-// }
-
 void handleData(sem_t * sem,char * shMemory, int size) {
-    int aux = 0; int var = 1;
-    while(aux < size) {
+    int i = 0; 
+    int fileNumber = 1;
+
+    while(i < size) {
 
         waitSemaphore(sem);
 
-        printf("%d %s",  var, shMemory);
-        var++;
+        printf("%d %s",  fileNumber, shMemory);
+        fileNumber++;
         shMemory += JUMP;
-        aux += JUMP;
+        i += JUMP;
     }
 }
