@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     // close(shmFd);
 
-    printf("%d %d\n",(int)shmSize, taskCount);
+    printf("%d\n", argc - 1); 
     sleep(2);
 
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     int tasksFinished = 0;
 
     int initialPaths = filesPerSlave * slaveAmount;
-    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksSent, &tasksFinished);
+    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksSent);
 
     char buffer[BUFFER_SIZE] = {0};
 
@@ -244,7 +244,7 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
     }
 }
 
-void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksSent, int *tasksFinished) {
+void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksSent) {
 
     for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
         char fileSent[BUFFER_SIZE] = {0};

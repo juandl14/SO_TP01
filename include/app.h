@@ -17,7 +17,7 @@ typedef struct slave {
 
 void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *const argv[]);
 void endChildren(Tslave slavesArray[], int slaveAmount);
-void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress, int *tasksFinished);
+void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksInProgress);
 int chargeReadSet(fd_set *fdReadSet, Tslave slavesArray[], int slaveAmount);
 
 #endif

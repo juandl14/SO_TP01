@@ -5,6 +5,6 @@
 
 #define MEMORY_LONG 50
 
-void handleData(sem_t *,char * );
+void handleData(sem_t *,char *, int);
 
 #endif
