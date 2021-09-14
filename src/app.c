@@ -126,21 +126,8 @@ int main(int argc, char *argv[]) {
 
     }
 
-    if (fclose(res) != 0) {
-        errorHandler("Error closing result file in main (app)");
-    }
+    closingApp(res, slavesArray, slaveAmount, sem, shmFd, shMemCopy, shmSize);
 
-    endChildren(slavesArray, slaveAmount);
-
-    /*
-    ** Closing shared memory and semaphores
-    */
-    closeSemaphore(sem);
-    unlinkSemaphore();
-
-    close(shmFd);
-    unmapSharedMemory(shMemCopy,shmSize);
-    unlinkSharedMemory();
 }
 
 
@@ -227,4 +214,19 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
 
     }
 
+}
+
+void closingApp(FILE * file, Tslave *slavesArray, int slaveAmount, sem_t * sem, int shmFd, void * mem, int size) {
+        if (fclose(file) != 0) {
+        errorHandler("Error closing result file in main (app)");
+    }
+
+    endChildren(slavesArray, slaveAmount);
+
+    closeSemaphore(sem);
+    unlinkSemaphore();
+
+    close(shmFd);
+    unmapSharedMemory(mem,size);
+    unlinkSharedMemory();
 }

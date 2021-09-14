@@ -29,4 +29,6 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
 
 int chargeReadSet(fd_set *fdReadSet, Tslave slavesArray[], int slaveAmount);
 
+void closingApp(FILE * file, Tslave *slavesArray, int slaveAmount, sem_t * sem, int shmFd, void * mem, int size);
+
 #endif
