@@ -1,5 +1,7 @@
 #include "library.h"
 
+/*** *** *** ERROR HANDLING *** *** *** *** *** *** ***/
+
 void errorHandler(const char *errorMsg) {
     char finalMsg[ERROR_MSG] = {0};
     strcat(finalMsg,errorMsg);
@@ -7,6 +9,9 @@ void errorHandler(const char *errorMsg) {
     perror(finalMsg);
     exit(EXIT_FAILURE);
 }
+
+
+/*** *** *** SEMAHPHORE HANDLING *** *** *** *** *** *** ***/
 
 void postSemaphore(sem_t *sem) {
     if(sem_post(sem) == ERROR_CODE) {
@@ -32,6 +37,9 @@ void unlinkSemaphore() {
         errorHandler("Error unlinking semaphore");
     }
 }
+
+
+/*** *** *** SHARED MEMORY HANDLING *** *** *** *** *** *** ***/
 
 void unmapSharedMemory(void * memory, int size) {
     if(munmap( memory,size) == ERROR_CODE) {

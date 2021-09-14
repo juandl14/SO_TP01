@@ -10,9 +10,11 @@ int main(int argc, const char *argv[]) {
     size_t fileNameLen = 0;
 
     while (getline(&fileName, &fileNameLen, stdin) > 0) {
+        
         fileName[strcspn(fileName, "\n")] = 0;
         solver(fileName);
     }
+
 }
 
 void solver(const char *fileName) {
