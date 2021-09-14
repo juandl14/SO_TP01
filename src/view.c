@@ -18,7 +18,9 @@ int main(int argc, char *argv[]) {
         errorHandler("Error: invalid amount of arguments (view)");
     }
 
-    shmSize *= BUFFER_SIZE;
+    printf("%d\n", shmSize);
+
+    // shmSize *= BUFFER_SIZE;
 
     if(shmSize <= 0) {
         errorHandler("Error defining size of shared memory (view)");
