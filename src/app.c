@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
     void *shMemCopy;
     off_t shmSize = taskCount * BUFFER_SIZE;
 
-    FILE *res = fopen("result.txt", "w");
-    if (res == NULL) {
+    FILE *outpFile = fopen("result.txt", "w");
+    if (outpFile == NULL) {
         errorHandler("Error opening result file (app)");
     }
     setBuffer(stdout,BUFFER_SIZE);
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }
     shMemCopy = shMemory;
 
-    sem_unlink(SEM_NAME);
+    //sem_unlink(SEM_NAME);
 
     sem_t *sem;
     if ((sem = sem_open(SEM_NAME, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, INIT_VAL_SEM)) == SEM_FAILED) {
@@ -58,75 +58,9 @@ int main(int argc, char *argv[]) {
     */
     createChildren(slavesArray, slaveAmount, SLAVE_PATH, NULL);
 
-    /* Send first files to the slaves */
-    int tasksSent = 0;
-    int tasksFinished = 0;
+    sendFiles(slaveAmount,filesPerSlave, slavesArray, argv, taskCount, shMemory, outpFile,sem);
 
-    int initialPaths = filesPerSlave * slaveAmount;
-    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksSent);
-
-    char buffer[BUFFER_SIZE] = {0};
-
-    while(tasksFinished < taskCount) {
-        fd_set readFdSet;
-        FD_ZERO(&readFdSet);
-
-        int max = -1;
-        int currentFd;
-
-        for(int i = 0; i < slaveAmount; i++) {
-            if(slavesArray[i].working) {
-                currentFd = slavesArray[i].in;
-                max = MAX(max, currentFd);
-                FD_SET(currentFd, &readFdSet);
-            }
-        }
-
-        int ready;
-        if((ready = select(max + 1, &readFdSet, NULL, NULL, NULL)) == ERROR_CODE) {
-            errorHandler("Error in select (app)");
-        }
-
-        for(int i = 0; i < slaveAmount && ready > 0; i++) {
-            int fd = slavesArray[i].in;
-            if(FD_ISSET(fd, &readFdSet)) {
-                int dimRead = read(fd, buffer, BUFFER_SIZE);
-                if (dimRead == ERROR_CODE) {
-                    errorHandler("Error reading from fdData (app)");
-                } else if (dimRead <= 0) {
-                    slavesArray[i].working = 0;
-                } else {
-                    tasksFinished++;
-                    fprintf(res, "%s\n", buffer);
-                    slavesArray[i].fileCount--;
-                    buffer[dimRead + 1] = '\0';
-                    if (sprintf((char*)(shMemory), "%s\n", buffer) == ERROR_CODE) {
-                        errorHandler("Error performing sprintf in function main (app)");
-                    }
-                    shMemory += JUMP;
-                    postSemaphore(sem);
-                }
-
-                /* send new files to slaves */
-                if(slavesArray[i].fileCount == 0 && tasksSent < taskCount) {
-                    char fileToSlave[BUFFER_SIZE] = {0};
-                    strcat(fileToSlave, argv[tasksSent + 1]);
-                    strcat(fileToSlave, "\n\0");
-                    if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave)) == ERROR_CODE) {
-                        errorHandler("Error sending files to slaves (app)");
-                    }
-                    tasksSent++;
-                    slavesArray[i].fileCount++;
-                    slavesArray[i].working = 1;
-                }
-                ready--;
-            }
-
-        }
-
-    }
-
-    closingApp(res, slavesArray, slaveAmount, sem, shmFd, shMemCopy, shmSize);
+    closingApp(outpFile, slavesArray, slaveAmount, sem, shmFd, shMemCopy, shmSize);
 
 }
 
@@ -196,6 +130,76 @@ void endChildren(Tslave slavesArray[], int slaveAmount) {
     }
 }
 
+void sendFiles(int slaveAmount,int filesPerSlave, Tslave *slavesArray, char ** argv, int taskCount, void * shMemory, FILE * outpFile,sem_t *sem) {
+    /* Send first files to the slaves */
+    int tasksSent = 0;
+    int tasksFinished = 0;
+
+    int initialPaths = filesPerSlave * slaveAmount;
+    sendInitFiles(slavesArray, slaveAmount, argv, initialPaths, &tasksSent);
+
+    char buffer[BUFFER_SIZE] = {0};
+
+    while(tasksFinished < taskCount) {
+        fd_set readFdSet;
+        FD_ZERO(&readFdSet);
+
+        int max = -1;
+        int currentFd;
+
+        for(int i = 0; i < slaveAmount; i++) {
+            if(slavesArray[i].working) {
+                currentFd = slavesArray[i].in;
+                max = MAX(max, currentFd);
+                FD_SET(currentFd, &readFdSet);
+            }
+        }
+
+        int ready;
+        if((ready = select(max + 1, &readFdSet, NULL, NULL, NULL)) == ERROR_CODE) {
+            errorHandler("Error in select (app)");
+        }
+
+        for(int i = 0; i < slaveAmount && ready > 0; i++) {
+            int fd = slavesArray[i].in;
+            if(FD_ISSET(fd, &readFdSet)) {
+                int dimRead = read(fd, buffer, BUFFER_SIZE);
+                if (dimRead == ERROR_CODE) {
+                    errorHandler("Error reading from fdData (app)");
+                } else if (dimRead <= 0) {
+                    slavesArray[i].working = 0;
+                } else {
+                    tasksFinished++;
+                    fprintf(outpFile, "%s\n", buffer);
+                    slavesArray[i].fileCount--;
+                    buffer[dimRead + 1] = '\0';
+                    if (sprintf((char*)(shMemory), "%s\n", buffer) == ERROR_CODE) {
+                        errorHandler("Error performing sprintf in function main (app)");
+                    }
+                    shMemory += JUMP;
+                    postSemaphore(sem);
+                }
+
+                /* send new files to slaves */
+                if(slavesArray[i].fileCount == 0 && tasksSent < taskCount) {
+                    char fileToSlave[BUFFER_SIZE] = {0};
+                    strcat(fileToSlave, argv[tasksSent + 1]);
+                    strcat(fileToSlave, "\n\0");
+                    if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave)) == ERROR_CODE) {
+                        errorHandler("Error sending files to slaves (app)");
+                    }
+                    tasksSent++;
+                    slavesArray[i].fileCount++;
+                    slavesArray[i].working = 1;
+                }
+                ready--;
+            }
+
+        }
+
+    }
+}
+
 void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int initialPaths, int *tasksSent) {
 
     for(int currentTask = 0, i = 1; currentTask < initialPaths; currentTask++, i++) {
@@ -217,7 +221,7 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
 }
 
 void closingApp(FILE * file, Tslave *slavesArray, int slaveAmount, sem_t * sem, int shmFd, void * mem, int size) {
-    
+
     if (fclose(file) != 0) {
         errorHandler("Error closing result file in main (app)");
     }
