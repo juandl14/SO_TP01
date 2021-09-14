@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     // close(shmFd);
 
-    printf("%d\n",(int)shmSize);
+    printf("%d %d\n",(int)shmSize, taskCount);
     sleep(2);
 
 
@@ -115,11 +115,12 @@ int main(int argc, char *argv[]) {
                 }
 
                 //send new files to slaves
-                if(!slavesArray[i].working && tasksSent < taskCount) {
+                if(slavesArray[i].fileCount == 0 && tasksSent < taskCount) {
                     char fileToSlave[BUFFER_SIZE] = {0};
-                    strcat(fileToSlave, argv[tasksSent + 1]);
-                    strcat(fileToSlave, "\n\0");
-                    if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave))) {
+                    // char *vec;
+                    /*vec = */strcat(fileToSlave, argv[tasksSent + 1]);
+                    /*vec = */strcat(fileToSlave, "\n\0");
+                    if(write(slavesArray[i].out, fileToSlave, strlen(fileToSlave)) == ERROR_CODE) {
                         errorHandler("Error sending files to slaves (app)");
                     }
                     tasksSent++;
@@ -137,6 +138,8 @@ int main(int argc, char *argv[]) {
         }
 
     }
+
+    // sprintf((char*)(shMemory), "%c", '\0');
 
     endChildren(slavesArray, slaveAmount);
 
@@ -246,7 +249,7 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
     for(int currentTask = 0, i = 1; currentTask < initialPaths /*capaz no es esto*/; currentTask++, i++) {
         char fileSent[BUFFER_SIZE] = {0};
         strcat(fileSent, fileName[i]);
-        strcat(fileSent, "\n");
+        strcat(fileSent, "\n\0");
         if(write(slavesArray[currentTask % slaveAmount].out, fileSent, strlen(fileSent)) == ERROR_CODE) {
             errorHandler("Error writing in fdPath (app)");
         }

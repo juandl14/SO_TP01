@@ -7,18 +7,27 @@ int main(int argc, char *argv[]) {
     }
 
     // Reciving data to initialize
-    int shmSize;
+    int shmSize, taskCount;
 
     // printf("%d\n", argc);
 
     if (argc == 1) {
         char buff[MEMORY_LONG] = {0};
-        if(read(STDIN, buff, MEMORY_LONG) == ERROR_CODE) {
+        int len;
+        if(len = read(STDIN, buff, MEMORY_LONG) == ERROR_CODE) {
             errorHandler("Error reading data for initializing shared memory (view)");
         }
         shmSize = atoi(buff);
+        // char *dest = malloc(len * sizeof(char));
+        // strncpy(dest, buff, len);
+        // char *tok = strtok(dest, " ");
+        // shmSize = atoi(tok);
+        // *tok = strtok(NULL, " ");
+        // taskCount = atoi(tok);
+        // free(dest);
     } else if (argc == 2) {
         shmSize = atoi(argv[1]);
+        taskCount = atoi(argv[2]);
     } else {
         errorHandler("Error: invalid amount of arguments (view)");
     }
