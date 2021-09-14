@@ -46,4 +46,6 @@ void unlinkSemaphore();
 void unmapSharedMemory(void *, int );
 void unlinkSharedMemory();
 
+void setBuffer(FILE * ,size_t );
+
 #endif

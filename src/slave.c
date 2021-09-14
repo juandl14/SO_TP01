@@ -2,9 +2,7 @@
 
 int main(int argc, const char *argv[]) {
 
-    if(setvbuf(stdout, NULL, _IONBF, 0) != 0) {
-        errorHandler("Error performing setvbuf in main (slave)");
-    }
+    setBuffer(stdout,0);
 
     char *fileName = NULL;
     size_t fileNameLen = 0;

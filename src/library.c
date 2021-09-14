@@ -52,3 +52,9 @@ void unlinkSharedMemory() {
         errorHandler("Error unlinking shared memory");
     }
 }
+
+void setBuffer(FILE * stream,size_t size) {
+        if (setvbuf(stream, NULL, _IONBF, size) != 0) {
+        errorHandler("Error setting buffer in main (app)");
+    }
+}

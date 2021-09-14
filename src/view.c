@@ -1,10 +1,8 @@
 #include "view.h"
 
 int main(int argc, char *argv[]) {
-
-    if (setvbuf(stdin, NULL, _IONBF, BUFFER_SIZE) != 0) {
-        errorHandler("Error performing setvbuf in main (view)");
-    }
+    
+    setBuffer(stdin,BUFFER_SIZE);
 
     // Reciving data to initialize
     int shmSize;
@@ -47,18 +45,13 @@ int main(int argc, char *argv[]) {
     void *shmPtr = shMemory;
 
 
-    // Showing results
     handleData(sem,(char*)(shMemory), shmSize);
 
-
-    // Closing shared memory and semaphores
-    closeSemaphore(sem);
-    close(shmFd);
-
-    unmapSharedMemory(shmPtr,shmSize);
+    closingView(sem, shmFd, shmSize, shmPtr);
 
     return 0;
 }
+
 
 void handleData(sem_t * sem,char * shMemory, int size) {
     int i = 0; 
@@ -73,4 +66,12 @@ void handleData(sem_t * sem,char * shMemory, int size) {
         shMemory += JUMP;
         i += JUMP;
     }
+}
+
+void closingView(sem_t * sem, int shmFd,int shmSize, void * shMemory) {
+    
+    closeSemaphore(sem);
+    close(shmFd);
+
+    unmapSharedMemory(shMemory,shmSize);
 }

@@ -1,6 +1,9 @@
 #include "app.h"
 
 int main(int argc, char *argv[]) {
+
+    /* ** ** Openers - buffer, shared memory, semaphores ** ** */
+
     sem_unlink(SEM_NAME);
 
     if (argc < 2) {
@@ -16,17 +19,11 @@ int main(int argc, char *argv[]) {
 
     Tslave slavesArray[slaveAmount];
 
-    /*
-    ** Opening shared memory and semaphores
-    */
     void *shMemory;
     void *shMemCopy;
     off_t shmSize = taskCount * BUFFER_SIZE;
 
-
-    if (setvbuf(stdout, NULL, _IONBF, BUFFER_SIZE) != 0) {
-        errorHandler("Error setting buffer in main (app)");
-    }
+    setBuffer(stdout,BUFFER_SIZE);
 
     int shmFd;
     if ((shmFd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666)) == ERROR_CODE) {
@@ -212,7 +209,7 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
         char fileSent[BUFFER_SIZE] = {0};
         strcat(fileSent, fileName[i]);
         strcat(fileSent, "\n\0");
-        
+
         if(write(slavesArray[currentTask % slaveAmount].out, fileSent, strlen(fileSent)) == ERROR_CODE) {
             errorHandler("Error writing in fdPath (app)");
         }
