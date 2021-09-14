@@ -217,7 +217,8 @@ void sendInitFiles(Tslave slavesArray[], int slaveAmount, char **fileName, int i
 }
 
 void closingApp(FILE * file, Tslave *slavesArray, int slaveAmount, sem_t * sem, int shmFd, void * mem, int size) {
-        if (fclose(file) != 0) {
+    
+    if (fclose(file) != 0) {
         errorHandler("Error closing result file in main (app)");
     }
 
