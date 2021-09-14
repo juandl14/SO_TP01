@@ -25,8 +25,14 @@ $ make all
 ```
 
 #### 3. Ejecución
-Para ejecutar [faltaria completar esto]
-
+El programa App guardará los resultados en un archivo mediante la siguiente ejecución:
+```
+$ ./App <files_path>
+```
+Para imprimir en pantalla estos resultados, se puede ejecutar View:
+```
+$ ./View <MEMORY_LEN>
+```
 ---
 
 Finalmente y una vez terminada la ejecución, si se quieren remover los archivos creados en la compilación, debe utilizarse el siguiente comando en la terminal:
