@@ -23,6 +23,10 @@ int main(int argc, char *argv[]) {
     void *shMemCopy;
     off_t shmSize = taskCount * BUFFER_SIZE;
 
+    FILE *res = fopen("result.txt", "w");
+    if (res == NULL) {
+        errorHandler("Error opening result file (app)");
+    }
 
     if (setvbuf(stdout, NULL, _IONBF, BUFFER_SIZE) != 0) {
         errorHandler("Error setting buffer in main (app)");
@@ -105,6 +109,7 @@ int main(int argc, char *argv[]) {
                     slavesArray[i].working = 0;
                 } else {
                     tasksFinished++;
+                    fprintf(res, "%s\n", buffer);
                     slavesArray[i].fileCount--;
                     buffer[dimRead + 1] = '\0';
                     if (sprintf((char*)(shMemory), "%s\n", buffer) == ERROR_CODE) {
@@ -140,6 +145,10 @@ int main(int argc, char *argv[]) {
     }
 
     // sprintf((char*)(shMemory), "%c", '\0');
+
+    if (fclose(res) != 0) {
+        errorHandler("Error closing result file in main (app)");
+    }
 
     endChildren(slavesArray, slaveAmount);
 

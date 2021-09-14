@@ -17,5 +17,6 @@ clean:
 	rm -rf App
 	rm -rf Slave
 	rm -rf View
+	rm -rf result.txt
 
 .PHONY: clean all
