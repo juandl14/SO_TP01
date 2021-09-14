@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
 
 
     handleData(sem,(char*)(shMemory), shmSize);
+    //handleData(sem,(char*)(shMemory), taskCount);
 
     closingView(sem, shmFd, shmSize, shmPtr);
 
