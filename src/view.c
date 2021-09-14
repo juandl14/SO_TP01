@@ -4,12 +4,11 @@ int main(int argc, char *argv[]) {
     
     setBuffer(stdin,BUFFER_SIZE);
 
-    // Reciving data to initialize
     int shmSize;
 
     if (argc == 1) {
-        char buff[MEMORY_LONG] = {0};
-        if(read(STDIN, buff, MEMORY_LONG) == ERROR_CODE) {
+        char buff[MEMORY_LEN] = {0};
+        if(read(STDIN, buff, MEMORY_LEN) == ERROR_CODE) {
             errorHandler("Error reading data for initializing shared memory (view)");
         }
         shmSize = atoi(buff);
@@ -46,7 +45,6 @@ int main(int argc, char *argv[]) {
 
 
     handleData(sem,(char*)(shMemory), shmSize);
-    //handleData(sem,(char*)(shMemory), taskCount);
 
     closingView(sem, shmFd, shmSize, shmPtr);
 

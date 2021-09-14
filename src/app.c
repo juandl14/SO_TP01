@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     /*
     ** Handling slaves and files
     */
-    createChildren(slavesArray, slaveAmount, /*argv + 1,*/ SLAVE_PATH, NULL);
+    createChildren(slavesArray, slaveAmount, SLAVE_PATH, NULL);
 
     /* Send first files to the slaves */
     int tasksSent = 0;
@@ -127,8 +127,6 @@ int main(int argc, char *argv[]) {
         }
 
     }
-
-    // sprintf((char*)(shMemory), "%c", '\0');
 
     if (fclose(res) != 0) {
         errorHandler("Error closing result file in main (app)");
