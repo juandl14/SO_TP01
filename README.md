@@ -29,9 +29,15 @@ El programa App guardará los resultados en un archivo mediante la siguiente eje
 ```
 $ ./App <files_path>
 ```
-Para imprimir en pantalla estos resultados, se puede ejecutar View:
+Esto devolverá un entero <MEMORY_SIZE>, el cual se usa como argumento en la ejecución del View.
+Para imprimir en pantalla estos resultados, ejecutar View de la siguiente forma:
 ```
-$ ./View <MEMORY_LEN>
+$ ./View <MEMORY_SIZE>
+```
+
+También se pueden ejecutar al mismo tiempo View y App con el siguiente comando:
+```
+$ ./App <files_path> | ./View
 ```
 ---
 

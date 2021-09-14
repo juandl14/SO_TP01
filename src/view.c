@@ -56,14 +56,12 @@ int main(int argc, char *argv[]) {
 
 void handleData(sem_t * sem,char * shMemory, int size) {
     int i = 0;
-    int fileNumber = 1;
 
     while(i < size) {
 
         waitSemaphore(sem);
 
-        printf("%d %s",  fileNumber, shMemory);
-        fileNumber++;
+        printf("%s", shMemory);
         shMemory += JUMP;
         i += JUMP;
     }
