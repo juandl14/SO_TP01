@@ -1,5 +1,7 @@
 #include "app.h"
 
+#define PIPE_NAME "pathName"
+
 int main(int argc, char *argv[]) {
 
     /* ** ** Openers - buffer, shared memory, semaphores ** ** */
@@ -56,7 +58,9 @@ int main(int argc, char *argv[]) {
     /*
     ** Handling slaves and files
     */
+    createNamedPipes();
     createChildren(slavesArray, slaveAmount, SLAVE_PATH, NULL);
+
 
     sendFiles(slaveAmount,filesPerSlave, slavesArray, argv, taskCount, shMemory, outpFile,sem);
 
@@ -113,6 +117,14 @@ void createChildren(Tslave slavesArray[], int slaveAmount, char *path, char *con
             errorHandler("Error forking in function createChildren (app)");
         }
     }
+}
+
+void createNamedPipes() {
+    
+    if (mkfifo(PIPE_NAME,0x666)== ERROR_CODE) {
+        errorHandler("...");
+    }
+    
 }
 
 void endChildren(Tslave slavesArray[], int slaveAmount) {
@@ -178,7 +190,7 @@ void sendFiles(int slaveAmount,int filesPerSlave, Tslave *slavesArray, char ** a
                     }
                     shMemory += JUMP;
                     postSemaphore(sem);
-                }
+                }E:
 
                 /* send new files to slaves */
                 if(slavesArray[i].fileCount == 0 && tasksSent < taskCount) {
@@ -224,6 +236,10 @@ void closingApp(FILE * file, Tslave *slavesArray, int slaveAmount, sem_t * sem, 
 
     if (fclose(file) != 0) {
         errorHandler("Error closing result file in main (app)");
+    }
+
+    if (remove(PIPE_NAME) == ERROR_CODE) {
+        errorHandler("error removen pipe");
     }
 
     endChildren(slavesArray, slaveAmount);
